@@ -1,4 +1,4 @@
-% Savio intermediate training: Savio tips and tricks: making the most of the Slurm scheduler and of installing/using software in Mamba/Conda environments
+% Savio intermediate training: Savio tips and tricks -- making the most of the Slurm scheduler and of Mamba/Conda environments 
 % April 18, 2024
 % Chris Paciorek and Jeffrey Jacob
 
@@ -8,15 +8,28 @@ CHECK: savio_debug doesn't prevent >30 minutes (2h seems fine)
 
  - We offer platforms and services for researchers working with [sensitive data](https://docs-research-it.berkeley.edu/services/srdc/)
 
- - Get paid to develop your skills in research data and computing! Berkeley Research Computing is hiring several graduate student Domain Consultants for flexible appointments, 10% to 25% effort (4-10 hours/week). Email your cover letter and CV to: research-it@berkeley.edu.
+ - Get paid to develop your skills in research data and computing!
+   - Berkeley Research Computing is hiring several graduate student Domain Consultants for flexible appointments, 10% to 25% effort (4-10 hours/week). 
+   - Email your cover letter and CV to: research-it@berkeley.edu.
 
 # Introduction
 
-We'll do this mostly as a demonstration. We encourage you to login to your account and try out the various examples yourself as we go through them.
+We'll do this in part as a demonstration. We encourage you to login to your account and try out the various examples yourself as we go through them.
 
-Much of this material is based on the extensive Savio documention we have prepared and continue to prepare, available at [https://docs-research-it.berkeley.edu/services/high-performance-computing/](https://docs-research-it.berkeley.edu/services/high-performance-computing/).
+Much of this material is based on the extensive Savio documention we have prepared and continue to update, available at [https://docs-research-it.berkeley.edu/services/high-performance-computing/](https://docs-research-it.berkeley.edu/services/high-performance-computing/).
 
 The materials for this tutorial are available using git at the short URL ([tinyurl.com/brc-oct22](https://tinyurl.com/brc-apr24)), the  GitHub URL ([https://github.com/ucb-rit/savio-training-slurm-conda-spring-2024](https://github.com/ucb-rit/savio-training-slurm-conda-spring-2024)), or simply as a [zip file](https://github.com/ucb-rit/savio-training-slurm-conda-spring-2024/archive/main.zip).
+
+# How to get additional help
+
+ - For technical issues and questions about using Savio:
+    - brc-hpc-help@berkeley.edu
+ - For questions about computing resources in general, including cloud computing:
+    - brc@berkeley.edu or research-it-consulting@berkeley.edu
+    - office hours: Wed. 1:30-3:00 and Thur. 9:30-11:00 [on Zoom](https://research-it.berkeley.edu/programs/berkeley-research-computing/research-computing-consulting)
+ - For questions about data management (including HIPAA-protected data):
+    - researchdata@berkeley.edu
+    - office hours: Wed. 1:30-3:00 and Thur. 9:30-11:00 [on Zoom](https://research-it.berkeley.edu/programs/berkeley-research-computing/research-computing-consulting)
 
 # Outline
 
@@ -26,18 +39,12 @@ This training session will cover the following topics:
 
 - Slurm tips and tricks
   - Associations: Accounts, partitions and queues
-  - Understanding the queue and getting jobs to start faster
+  - Requesting specific resources, including GPUs
   - Diagnosing Slurm submission errors
-  - Requesting GPUs, GPU types
-  - Requesting particular features
+  - Understanding the queue and getting jobs to start faster
   - Using Slurm flags for parallelization
-    - ntasks vs. cpus-per-task
-    - per-node and per-core scheduling
-    - MPI and ntasks
-    - Gnu parallel
   - Using MPI and troubleshooting problems
-  - Diagnosing job run-time errors and monitoring jobs
-    - Including/excluding nodes
+  - Diagnosing job run-time errors
 - Working with Conda/Mamba environments
     - Setting up environments
       - Mamba and dependency resolution
@@ -120,7 +127,7 @@ In contrast, through my FCA, I have access to the most partitions at normal prio
 srun: error: Unable to allocate resources: Invalid account or account/partition combination specified
 ```
 
-# # Submitting a batch job
+# Submitting a batch job
 
 Let's see how to submit a simple job. If your job will only use the resources on a single node, you can do the following. 
 
@@ -175,23 +182,23 @@ srun --jobid=<JOB_ID> --pty /bin/bash
 ```
 
 
-# Specific resources
+# Specific resources: CPUs (cores)
 
-## CPUs (cores)
-
-For partitions named `_htc` or `_gpu` jobs are scheduled (and charged) per core. Default one core.
+For partitions named `_htc` or `_gpu`, jobs are scheduled (and charged) per core. Default one core.
 
 For other partitions, all jobs are given exclusive access to the entire node or nodes assigned to the job (and your account is charged for all of the cores on the node(s)).
 
 In a few partitions the number of cores differ between machines in the partition. 
+
   - E.g., [in `savio3`, some nodes have 40 cores and some have 32 cores](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/hardware-config/).
   - To request [particular 'constraints'](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/running-your-jobs/scheduler-config/), you can use `-C`, e.g.,
+  
     ```
     srun -p savio3 -C savio3_c40 -A ac_scsguest --pty -t 5:00 bash  # 40 cores
     srun -p savio3 -C savio3 -A ac_scsguest --pty -t 5:00 bash      # 32 cores
     ```
 
-## Memory (RAM)
+# Specific resources: Memory (RAM)
 
 You generally should not request a particular amount of memory:
  
@@ -199,7 +206,7 @@ You generally should not request a particular amount of memory:
  - per-core allocations are given memory proportional to the [number of cores](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/hardware-config/).
     - to get more memory, request the number of cores equivalent to the memory you need.
 
-## GPUs
+# Specific resources: GPUs
 
 GPU technology is advancing fast. As a result, it's hard to maintain a large, homogeneous pool of [GPU nodes](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/hardware-config).
 
@@ -208,6 +215,7 @@ GPU technology is advancing fast. As a result, it's hard to maintain a large, ho
 - `savio4_gpu` has A5000 nodes.
 
 Required submission info:
+
   - Request the number of GPUs.
   - Request a [fixed number of CPUs for each GPU you need](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/running-your-jobs/submitting-jobs/#gpu-jobs).
   - Request the GPU type in `savio3_gpu` and `savio4_gpu`.
@@ -242,7 +250,7 @@ squeue -o "%.7i %.12P %.20j %.8u %.2t %.5C %.5D %.12M %.12l %.8r %.20R %.8p %.20
 ```
 
 
-## Submission problems
+# Submission problems
 
 Submission failures:
 
@@ -292,7 +300,7 @@ fc_paciore     18084591 savio4_gp                 bash paciorek PD 5:00      0:0
 
 
 
-## Waiting in the queue
+# Waiting in the queue
 
 Our `sq` tool (which wraps Slurm's `squeue` command can help understand why jobs are not starting and what happened to recent jobs.
 
@@ -311,13 +319,13 @@ Tools to diagnose queueing situations:
     - `squeue --state=PD`
 
 
-## How the queue works
+# How the queue works
 
 - Condo jobs get top priority and will go to the top of the queue.
 - FCAs (and then users within FCAs) who've used Savio less in recent weeks have higher priority (see the `PRIORITY` column of `squeue` (fair share)
 - Slurm uses ["backfilling"](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/running-your-jobs/why-job-not-run/) to try to fit in lower-priority jobs that won't delay higher-priority jobs.
 
-## How the queue works (condos)
+# How the queue works (condos)
 
 - Aggregated over all users of the condo, limited to at most the number of nodes purchased by the condo at any given time. 
      - Additional jobs will be queued until usage drops below that limit. 
@@ -328,7 +336,7 @@ Tools to diagnose queueing situations:
         - Condo jobs are prioritized over FCA jobs in the queue and will start as soon as resources become available. 
         - Usually any lag in starting condo jobs under this circumstance is limited.
 
-## How the queue works (FCAs)
+# How the queue works (FCAs)
 
      - Start when they reach the top of the queue and resources become available as running jobs finish. 
      - The queue is ordered based on the Slurm Fairshare priority (specifically the Fair Tree algorithm). 
@@ -410,7 +418,7 @@ sq -h
 ```
 
 
-## Getting your job to start faster
+# Getting your job to start faster
 
 - Reduce the time limit.
 - Request fewer nodes or cores.
