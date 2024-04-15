@@ -2,6 +2,8 @@
 % April 18, 2024
 % Chris Paciorek and Jeffrey Jacob
 
+CHECK: savio_debug doesn't prevent >30 minutes (2h seems fine)
+
 # Upcoming events and hiring
 
  - We offer platforms and services for researchers working with [sensitive data](https://docs-research-it.berkeley.edu/services/srdc/)
@@ -26,15 +28,16 @@ This training session will cover the following topics:
   - Associations: Accounts, partitions and queues
   - Understanding the queue and getting jobs to start faster
   - Diagnosing Slurm submission errors
+  - Requesting GPUs, GPU types
+  - Requesting particular features
   - Using Slurm flags for parallelization
     - ntasks vs. cpus-per-task
     - per-node and per-core scheduling
     - MPI and ntasks
     - Gnu parallel
   - Using MPI and troubleshooting problems
-  - Requesting GPUs, GPU types
-  - Requesting particular features and including/excluding nodes
   - Diagnosing job run-time errors and monitoring jobs
+    - Including/excluding nodes
 - Working with Conda/Mamba environments
     - Setting up environments
       - Mamba and dependency resolution
@@ -54,20 +57,18 @@ This training session will cover the following topics:
     - Setting up Jupyter kernels
     - Using mamba/conda for non-Python related software
 
+# Slurm scheduler 
 
-# Submitting jobs: overview
+All computations are done by submitting jobs to the scheduling software that manages jobs on the cluster, called Slurm.
 
-All computations are done by submitting jobs to the scheduling software that manages jobs on the cluster, called SLURM.
+Why is this necessary? Otherwise your jobs would be slowed down by other people's jobs running on the same node. This also allows everyone to fairly share Savio.
 
-Why is this necessary? Otherwise your jobs would be slowed down by other people's jobs running on the same node. This also allows everyone to share Savio in a fair way.
+Savio uses Slurm to:
 
-The basic workflow is:
+ 1) Allocate access to resources (compute nodes) for users' jobs
+ 2) Start and monitor jobs on allocated resources
+ 3) Manage the queue of pending jobs
 
- - login to Savio; you'll end up on one of the login nodes in your home directory
- - use `cd` to go to the directory from which you want to submit the job
- - submit the job using `sbatch` (or an interactive job using `srun`, discussed later)
-    - when your job starts, the working directory will be the one from which the job was submitted
-    - the job will be running on a compute node, not the login node
 
 # Submitting jobs: accounts and partitions
 
@@ -76,13 +77,15 @@ When submitting a job, the main things you need to indicate are the project acco
 You can see what accounts you have access to and which partitions within those accounts as follows:
 
 ```
-sacctmgr -p show associations user=$USER
+sacctmgr -p show associations user=SAVIO_USERNAME
 ```
 
-Here's an example of the output for a user who has access to an FCA and a condo:
+Here's an example of the output for a user who has access to an FCA and a condo.
 ```
 Cluster|Account|User|Partition|Share|GrpJobs|GrpTRES|GrpSubmit|GrpWall|GrpTRESMins|MaxJobs|MaxTRES|MaxTRESPerNode|MaxSubmit|MaxWall|MaxTRESMins|QOS|Def QOS|GrpTRESRunMins|
-brc|fc_paciorek|paciorek|savio3_gpu|1|||||||||||||gtx2080_gpu3_normal,savio_lowprio,v100_gpu3_normal|gtx2080_gpu3_normal||
+brc|fc_paciorek|paciorek|savio4_gpu|1|||||||||||||a5k_gpu4_normal,savio_lowprio|a5k_gpu4_normal||
+brc|fc_paciorek|paciorek|savio4_htc|1|||||||||||||savio_debug,savio_normal|savio_normal||
+brc|fc_paciorek|paciorek|savio3_gpu|1|||||||||||||a40_gpu3_normal,gtx2080_gpu3_normal,savio_lowprio,v100_gpu3_normal|gtx2080_gpu3_normal||
 brc|fc_paciorek|paciorek|savio3_htc|1|||||||||||||savio_debug,savio_normal|savio_normal||
 brc|fc_paciorek|paciorek|savio3_bigmem|1|||||||||||||savio_debug,savio_normal|savio_normal||
 brc|fc_paciorek|paciorek|savio3|1|||||||||||||savio_debug,savio_normal|savio_normal||
@@ -94,6 +97,7 @@ brc|fc_paciorek|paciorek|savio2_bigmem|1|||||||||||||savio_debug,savio_normal|sa
 brc|fc_paciorek|paciorek|savio2|1|||||||||||||savio_debug,savio_normal|savio_normal||
 brc|fc_paciorek|paciorek|savio|1|||||||||||||savio_debug,savio_normal|savio_normal||
 brc|fc_paciorek|paciorek|savio_bigmem|1|||||||||||||savio_debug,savio_normal|savio_normal||
+brc|co_stat|paciorek|savio4_htc|1|||||||||||||savio_lowprio|savio_lowprio||
 brc|co_stat|paciorek|savio3_htc|1|||||||||||||savio_lowprio|savio_lowprio||
 brc|co_stat|paciorek|savio3_bigmem|1|||||||||||||savio_lowprio|savio_lowprio||
 brc|co_stat|paciorek|savio3|1|||||||||||||savio_lowprio|savio_lowprio||
@@ -107,15 +111,20 @@ brc|co_stat|paciorek|savio_bigmem|1|||||||||||||savio_lowprio|savio_lowprio||
 brc|co_stat|paciorek|savio2|1|||||||||||||savio_lowprio,stat_savio2_normal|stat_savio2_normal||
 ```
 
-If you are part of a condo, you'll notice that you have *low-priority* access to certain partitions. For example, user 'paciorek' is part of the statistics condo *co_stat*, which purchased some savio2 nodes and savio2_gpu nodes and therefore has normal access to those, but he can also burst beyond the condo and use other partitions at low-priority (see below).
+If you are part of a condo, you'll notice that you have *low-priority* access to certain partitions. For example I am part of the statistics condo *co_stat*, which owns some 'savio2' nodes and 'savio2_gpu' nodes and therefore I have normal access to those, but I can also burst beyond the condo and use other partitions at low priority. 
 
-In contrast, through his FCA, 'paciorek' has access to the savio, savio2, and savio3 partitions as well as various big memory, HTC, and GPU partitions, all at normal priority.
+In contrast, through my FCA, I have access to the most partitions at normal priority, but not all of them...
 
-# Submitting a batch job
+```
+[paciorek@ln002 ~]$ srun -p savio4_gpu -A co_stat --gres=gpu:A5000:1 -t 5:00 --pty bash
+srun: error: Unable to allocate resources: Invalid account or account/partition combination specified
+```
 
-Let's see how to submit a simple job. If your job will only use the resources on a single node, you can do the following.
+# # Submitting a batch job
 
-Here's an example job script that I'll run. You'll need to modify the --account value and possibly the --partition value.
+Let's see how to submit a simple job. If your job will only use the resources on a single node, you can do the following. 
+
+Here's an example job script that I'll run. You'll need to modify the `--account` value and possibly the `--partition` value.
 
 ```bash
 #!/bin/bash
@@ -126,15 +135,20 @@ Here's an example job script that I'll run. You'll need to modify the --account 
 #SBATCH --account=fc_paciorek
 #
 # Partition:
-#SBATCH --partition=savio2
+#SBATCH --partition=savio3_htc
 #
-# Wall clock limit (5 minutes here):
-#SBATCH --time=00:05:00
+# Wall clock limit (45 seconds here):
+#SBATCH --time=00:00:45
 #
 ## Command(s) to run:
-module load python/3.9.12
+module load python/3.10.10    
 python calc.py >& calc.out
 ```
+
+Tip: It's generally a good idea to specify module versions explicitly for reproducibility.
+Default versions will change over time.
+
+# Monitoring jobs
 
 Now let's submit and monitor the job:
 
@@ -146,7 +160,7 @@ squeue -j <JOB_ID>
 wwall -j <JOB_ID>
 ```
 
-After a job has completed (or been terminated/cancelled), you can review the maximum memory used via the sacct command.
+After a job has completed (or been terminated/cancelled), you can review the maximum memory used (and other information) via the sacct command.
 
 ```
 sacct -j <JOB_ID> --format=JobID,JobName,MaxRSS,Elapsed
@@ -154,162 +168,58 @@ sacct -j <JOB_ID> --format=JobID,JobName,MaxRSS,Elapsed
 
 MaxRSS will show the maximum amount of memory that the job used in kilobytes.
 
-You can also login to the node where you are running and use commands like *top* and *ps*:
+You can also login to the node where you are running and use commands like `top`, `free`, and `ps`:
 
 ```
 srun --jobid=<JOB_ID> --pty /bin/bash
 ```
 
-NOTE: except for the partitions named *_htc and *_gpu, all jobs are given exclusive access to the entire node or nodes assigned to the job (and your account is charged for all of the cores on the node(s)).
 
+# Specific resources
 
-# Parallel job submission
+## CPUs (cores)
 
-If you are submitting a job that uses multiple nodes, you'll need to carefully specify the resources you need. The key flags for use in your job script are:
+For partitions named `_htc` or `_gpu` jobs are scheduled (and charged) per core. Default one core.
 
- - `--nodes` (or `-N`): indicates the number of nodes to use
- - `--ntasks-per-node`: indicates the number of tasks (i.e., processes) one wants to run on each node
- - `--cpus-per-task` (or `-c`): indicates the number of cpus to be used for each task
+For other partitions, all jobs are given exclusive access to the entire node or nodes assigned to the job (and your account is charged for all of the cores on the node(s)).
 
-In addition, in some cases it can make sense to use the `--ntasks` (or `-n`) option to indicate the total number of tasks and let the scheduler determine how many nodes and tasks per node are needed. In general `--cpus-per-task` will be one except when running threaded code.  
+In a few partitions the number of cores differ between machines in the partition. 
+  - E.g., [in `savio3`, some nodes have 40 cores and some have 32 cores](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/hardware-config/).
+  - To request [particular 'constraints'](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/running-your-jobs/scheduler-config/), you can use `-C`, e.g.,
+    ```
+    srun -p savio3 -C savio3_c40 -A ac_scsguest --pty -t 5:00 bash  # 40 cores
+    srun -p savio3 -C savio3 -A ac_scsguest --pty -t 5:00 bash      # 32 cores
+    ```
 
-Here's an example job script for a job that uses MPI for parallelizing over multiple nodes:
+## Memory (RAM)
 
-```bash
-#!/bin/bash
-# Job name:
-#SBATCH --job-name=test
-#
-# Account:
-#SBATCH --account=account_name
-#
-# Partition:
-#SBATCH --partition=partition_name
-#
-# Number of MPI tasks needed for use case (example):
-#SBATCH --ntasks=40
-#
-# Processors per task:
-#SBATCH --cpus-per-task=1
-#
-# Wall clock limit:
-#SBATCH --time=00:00:30
-#
-## Command(s) to run (example):
-module load intel openmpi
-mpirun ./a.out
-```
+You generally should not request a particular amount of memory:
+ 
+ - full-node allocations can automatically use all the memory
+ - per-core allocations are given memory proportional to the [number of cores](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/hardware-config/).
+    - to get more memory, request the number of cores equivalent to the memory you need.
 
-When you write your code, you may need to specify information about the number of cores to use. SLURM will provide a variety of variables that you can use in your code so that it adapts to the resources you have requested rather than being hard-coded.
+## GPUs
 
-Here are some of the variables that may be useful: SLURM_NTASKS, SLURM_CPUS_PER_TASK, SLURM_NODELIST, SLURM_NNODES.
+GPU technology is advancing fast. As a result, it's hard to maintain a large, homogeneous pool of [GPU nodes](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/hardware-config).
 
-NOTE: when submitting GPU jobs [you need to request multiple CPUs per GPU](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/running-your-jobs/submitting-jobs/#gpu-jobs) (usually 2 GPUs, but for some of the GPU types in savio3_gpu, 4 or 8 GPUs).
+- `savio2_gpu` has old K80 GPUs.
+- `savio3_gpu` has GTX2080TI, TITAN RTX, V100, and A40 nodes.
+- `savio4_gpu` has A5000 nodes.
 
-# Parallel job submission patterns
+Required submission info:
+  - Request the number of GPUs.
+  - Request a [fixed number of CPUs for each GPU you need](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/running-your-jobs/submitting-jobs/#gpu-jobs).
+  - Request the GPU type in `savio3_gpu` and `savio4_gpu`.
 
-Some common paradigms are:
-
- - 1 node, many CPUs
-     - openMP/threaded jobs - 1 task, *c* CPUs for the task
-     - Python/R/GNU parallel - many tasks, 1 per CPU at any given time
- - many nodes, many CPUs
-     - MPI jobs that use 1 CPU per task for each of *n* tasks, spread across multiple nodes
-     - Python/R/GNU parallel - many tasks, 1 per CPU at any given time
- - hybrid jobs that use *c* CPUs for each of *n* tasks
-     - e.g., MPI+threaded code
-
-We have lots more [examples of job submission scripts](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/running-your-jobs/scheduler-examples) for different kinds of parallelization (multi-node (MPI), multi-core (openMP), hybrid, etc.
-
-
-# Interactive jobs
-
-You can also do work interactively. This simply moves you from a login node to a compute node.
+For example:
 
 ```
-srun -A fc_paciorek -p savio2_htc  -c 1 -t 10:0 --pty bash
-
-# note that you end up in the same working directory as when you submitted the job
-
-# now execute on the compute node:
-env | grep SLURM
-module load matlab
-matlab -nodesktop -nodisplay
+sbatch -A fc_foo -p savio3_gpu --gres=gpu:GTX2080TI:1 -c 2 -t 60:00 job.sh
+sbatch -A fc_foo -p savio3_gpu --gres=gpu:A40:2 -c 16 -t 60:00 job.sh
 ```
 
-To end your interactive session (and prevent accrual of additional charges to your FCA), simply enter `exit` in the terminal session.
-
-NOTE: you are charged for the entire node when running interactive jobs (as with batch jobs) except in the HTC and GPU (*_htc and *_gpu) partitions.
-
-# Running graphical interfaces interactively
-
-If you are running a graphical interface, we recommend you use [Savio's Open OnDemand interface](https://ood.brc.berkeley.edu) (more in a later slide), e.g.,
-
- - Jupyter Notebooks
- - RStudio
- - the MATLAB GUI
- - VS Code
- - remote desktop
-
-# Low-priority queue
-
-Condo users have access to the broader compute resource that is limited only by the size of partitions, under the *savio_lowprio* QoS (queue). However this QoS does not get a priority as high as the general QoSs, such as *savio_normal* and *savio_debug*, or all the condo QoSs, and it is subject to preemption when all the other QoSs become busy.
-
-More details can be found [in the *Low Priority Jobs* section of the user guide](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/running-your-jobs/submitting-jobs/#low-priority).
-
-Suppose I wanted to burst beyond the Statistics condo to run on 20 nodes. I'll illustrate here with an interactive job though usually this would be for a batch job.
-
-
-```
-## First I'll see if there are that many nodes even available.
-sinfo -p savio2
-srun -A co_stat -p savio2 --qos=savio_lowprio --nodes=20 -t 10:00 --pty bash
-
-## now look at environment variables to see my job can access 20 nodes:
-env | grep SLURM
-```
-
-The low-priority queue is also quite useful for accessing specific GPU types in the `savio3_gpu` partition.
-
-# HTC jobs (and long-running jobs)
-
-There are multiple "HTC" partitions (savio2_htc, savio3_htc, savio4_htc [coming soon]) that allow you to request cores individually rather than an entire node at a time. In some cases the nodes in these partition are faster than the other nodes. Here is an example SLURM script:
-
-```
-#!/bin/bash
-# Job name:
-#SBATCH --job-name=test
-#
-# Account:
-#SBATCH --account=account_name
-#
-# Partition:
-#SBATCH --partition=savio3_htc
-#
-# Processors per task:
-#SBATCH --cpus-per-task=2
-#
-# Wall clock limit -- 10 minutes
-#SBATCH --time=00:10:00
-#
-## Command(s) to run (example):
-module load python/3.9.12
-python calc.py >& calc.out
-```
-
-One can run jobs up to 10 days (using four or fewer cores) in the *savio2_htc* partition if you include `--qos=savio_long`.
-
-# Alternatives to the HTC partition for collections of serial jobs
-
-You may have many serial jobs to run. It may be more cost-effective to collect those jobs together and run them across multiple cores on one or more nodes.
-
-Here are some options:
-
-  - using [GNU parallel](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/running-your-jobs/gnu-parallel/) to run many computational tasks (e.g., thousands of simulations, scanning tens of thousands of parameter values, etc.) as part of single Savio job submission
-  - using [single-node or multi-node parallelism](https://berkeley-scf.github.io/tutorial-parallelization) in Python, R, and MATLAB
-    - parallel R tools such as *future*, *foreach*, *parLapply*, and *mclapply*
-    - parallel Python tools such as  *ipyparallel*, *Dask*, and *ray*
-    - parallel functionality in MATLAB through *parfor*
+`CUDA_VISIBLE_DEVICES` will be set to `0,....` (i.e., "internal" numbering within job).
 
 # Monitoring jobs, the job queue, and overall usage
 
@@ -326,23 +236,107 @@ sinfo -p savio3
 sinfo -p savio2_gpu
 ```
 
-You can cancel a job with `scancel`.
-```
-scancel <YOUR_JOB_ID>
-```
-
 For more information on cores, QoS, and additional (e.g., GPU) resources, here's some syntax:
 ```
-squeue -o "%.7i %.12P %.20j %.8u %.2t %.9M %.5C %.8r %.3D %.20R %.8p %.20q %b"
+squeue -o "%.7i %.12P %.20j %.8u %.2t %.5C %.5D %.12M %.12l %.8r %.20R %.8p %.20q %b"
 ```
 
-We provide some [tips about monitoring your jobs](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/running-your-jobs/monitoring-jobs/).
 
-If you'd like to see how much of an FCA has been used:
+## Submission problems
+
+Submission failures:
+
+- Submitting to an account/partition/QoS you don't have access to.
+- FCA is exhausted ("This user/account pair does not have enough service units"):
+  If you'd like to see how much of an FCA has been used:
+  ```
+  check_usage.sh -a fc_bands
+  ```
+
+
+Frustratingly, some submissions can simply hang. They will never start but do not give an error message.
+
+- Time limit too long (e.g., more than 1 hour in `savio_debug` queue or more than 72 hours FCA job in `savio_normal`:
 
 ```
-check_usage.sh -a fc_rail
+[paciorek@ln002 ~]$ srun -A ac_scsguest  -t 74:00:00 -p savio3_htc --pty bash
+squeue -u paciorek -o "%.10a %.12i %.9P %.20j %.8u %.2t %l %.9M %.5C %.8r %.6D %R %p %q"
+   ACCOUNT        JOBID PARTITION                 NAME     USER ST TIME_LIMIT      TIME  CPUS   REASON  NODES NODELIST(REASON) PRIORITY QOS
+ac_scsgues     18084575 savio3_ht                 bash paciorek PD 3-02:00:00      0:00     1 QOSMaxWa      1 (QOSMaxWallDurationPerJobLimit) 0.00003294856288 savio_normal
 ```
+
+- Too many nodes requested:
+```
+[paciorek@ln002 ~]$ srun -A fc_paciorek -p savio4_htc -N 40 --pty -t 5:00 bash
+squeue -u paciorek -o "%.10a %.12i %.9P %.20j %.8u %.2t %l %.9M %.5C %.8r %.6D %R %p %q"
+   ACCOUNT        JOBID PARTITION                 NAME     USER ST TIME_LIMIT      TIME  CPUS   REASON  NODES NODELIST(REASON) PRIORITY QOS
+fc_paciore     18084601 savio4_ht                 bash paciorek PD 5:00      0:00    40 QOSMaxNo     40 (QOSMaxNodePerJobLimit) 0.00006896187553 savio_normal
+```
+
+- GPU jobs not requesting sufficient CPUs:
+```
+[paciorek@ln002 ~]$ srun -A fc_paciorek  -p savio4_gpu -c 2 --gres=gpu:A5000:1 --pty -t 5:00 bash
+squeue -u paciorek -o "%.10a %.12i %.9P %.20j %.8u %.2t %l %.9M %.5C %.8r %.6D %R %p %q"
+[paciorek@ln003 ~]$ mysq -u paciorek
+   ACCOUNT        JOBID PARTITION                 NAME     USER ST TIME_LIMIT      TIME  CPUS   REASON  NODES NODELIST(REASON) PRIORITY QOS
+fc_paciore     18084589 savio4_gp                 bash paciorek PD 5:00      0:00     2 QOSMinCp      1 (QOSMinCpuNotSatisfied) 0.00009200605566 a5k_gpu4_normal
+```
+
+- Invalid or missing GPU type:
+```
+[paciorek@ln002 ~]$ srun -A fc_paciorek  -p savio4_gpu -c 4 --gres=gpu:1 --pty -t 5:00 bash
+squeue -u paciorek -o "%.10a %.12i %.9P %.20j %.8u %.2t %l %.9M %.5C %.8r %.6D %R %p %q"
+   ACCOUNT        JOBID PARTITION                 NAME     USER ST TIME_LIMIT      TIME  CPUS   REASON  NODES NODELIST(REASON) PRIORITY QOS
+fc_paciore     18084591 savio4_gp                 bash paciorek PD 5:00      0:00     4 QOSMinGR      1 (QOSMinGRES) 0.00009200605566 a5k_gpu4_normal
+```
+
+
+
+## Waiting in the queue
+
+Our `sq` tool (which wraps Slurm's `squeue` command can help understand why jobs are not starting and what happened to recent jobs.
+
+[Reasons your job might sit in the queue](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/running-your-jobs/why-job-not-run/):
+  - The partition may be fully occupied (`Priority`, `Resources`). 
+  - Your condo may be fully utilizing its purchased resources (`QOSGrpCpuLimit`).
+  - The total number of FCA jobs in small partitions may be at its limit (`QOSGrpCpuLimit`).
+  - Slurm's fair share policy will prioritize less-active FCA groups (and less-active users) (`Priority`).
+  - FCA jobs have lower priority than condo jobs (`Priority`).
+  - Your time limit may overlap with a scheduled downtime.
+  
+Tools to diagnose queueing situations:
+  - `sinfo -p savio3_htc`
+  - Our `sq` tool, which wraps `squeue`.
+  - `squeue`
+    - `squeue --state=PD`
+
+
+## How the queue works
+
+- Condo jobs get top priority and will go to the top of the queue.
+- FCAs (and then users within FCAs) who've used Savio less in recent weeks have higher priority (see the `PRIORITY` column of `squeue` (fair share)
+- Slurm uses ["backfilling"](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/running-your-jobs/why-job-not-run/) to try to fit in lower-priority jobs that won't delay higher-priority jobs.
+
+## How the queue works (condos)
+
+- Aggregated over all users of the condo, limited to at most the number of nodes purchased by the condo at any given time. 
+     - Additional jobs will be queued until usage drops below that limit. 
+     - The pending jobs will be ordered based on the Slurm Fairshare priority, with users with less recent usage prioritized.
+     - Some circumstances, even when the condo's usage is below the limit, a condo job might not start immediately
+        - Because the partition is fully used, across all condo and FCA users of the given partition. 
+        - This can occur when a condo has not been fully used and FCA jobs have filled up the partition during that period of limited usage. 
+        - Condo jobs are prioritized over FCA jobs in the queue and will start as soon as resources become available. 
+        - Usually any lag in starting condo jobs under this circumstance is limited.
+
+## How the queue works (FCAs)
+
+     - Start when they reach the top of the queue and resources become available as running jobs finish. 
+     - The queue is ordered based on the Slurm Fairshare priority (specifically the Fair Tree algorithm). 
+     - The primary influence on this priority is the overall recent usage by all users in the same FCA as the user submitting the job. 
+     - Jobs from multiple users within an FCA are then influenced by their individual recent usage.
+     - In more detail, usage at the FCA level (summed across all partitions) is ordered across all FCAs, 
+        - Priority for a given job depends inversely on that recent usage (based on the FCA the job is using). 
+        - Similarly, amongst users within an FCA, usage is ordered amongst those users, such that for a given partition, a user with lower recent usage in that partition will have higher priority than one with higher recent usage.
 
 # When will my job start?
 
@@ -415,18 +409,139 @@ For help with `sq`:
 sq -h
 ```
 
-To learn more, see our page on understanding [when your jobs will run](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/running-your-jobs/why-job-not-run/).
+
+## Getting your job to start faster
+
+- Reduce the time limit.
+- Request fewer nodes or cores.
+- Find a less-used partition (using `sinfo`).
+- Submit to a condo instead of an FCA (if you're in both) for higher priority.
+- Submit to an FCA instead of a condo (if you're in both) if condo is full.
+
+# Parallelization
+
+Some flavors of parallelization:
+
+- threaded code (e.g., `openMP`, `TBB`): single-node only
+- threaded linear algebra in Python/numpy, R, Julia, etc. (uses `openMP` or `MKL`)
+- parallel loops, parallel maps in Python, R, etc. (usually one process per worker)
+   - Python: `dask`, `ray`, `ipyparallel` packages
+   - R: `future`, `parallel`, `foreach` packages
+- MPI (message-passing): single- and multiple-node
+- [GNU parallel](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/running-your-jobs/gnu-parallel/): parallelize independent tasks: single- and multiple-node
+
+Rules-of-thumb:
+- One core per process (i.e., "worker")
+- Multiple cores per process for threaded code
+- One or more task (computational piece) per worker
 
 
-# How to get additional help
+Important:
 
- - Check the Status and Announcements page:
-    - [https://research-it.berkeley.edu/services/high-performance-computing/status-and-announcements](https://research-it.berkeley.edu/services/high-performance-computing/status-and-announcements)
- - For technical issues and questions about using Savio:
-    - brc-hpc-help@berkeley.edu
- - For questions about computing resources in general, including cloud computing:
-    - brc@berkeley.edu
-    - office hours: office hours: Wed. 1:30-3:00 and Thur. 9:30-11:00 [on Zoom](https://research-it.berkeley.edu/programs/berkeley-research-computing/research-computing-consulting)
- - For questions about data management (including HIPAA-protected data):
-    - researchdata@berkeley.edu
-    - office hours: office hours: Wed. 1:30-3:00 and Thur. 9:30-11:00 [on Zoom](https://research-it.berkeley.edu/programs/berkeley-research-computing/research-computing-consulting)
+- Is code written so as to use parallelization?
+- What does the user need to specify?
+  - Sometimes multi-core, single-node parallelization will occur without user specification.
+
+# Slurm flags:
+
+- `--cpus-per-task` (`-c`): number of cores for each task
+- `--ntasks` (`-n`): total number of tasks
+- `--ntasks-per-node`: number of tasks on each node
+- `--nodes` (`-N`): the number of nodes to use
+
+Based on the flags, Slurm will set various shell environment variables your code can use to configure parallelization, e.g.,
+`SLURM_NTASKS`, `SLURM_CPUS_PER_TASK`, `SLURM_NODELIST`, `SLURM_NNODES`.
+
+We generally refer to "cores" rather than "CPUs" as modern CPUs have multiple computational cores that can each carry out independent work.
+
+# `cpus-per-task` vs. `ntasks`
+
+In some cases one can either use `--cpus-per-task` or `--ntasks` (or `--ntasks-per-node`) to get multiple cores on a single node.
+
+Caveats:
+  - Can't use `--cpus-per-task` to get cores on multiple nodes.
+  - Need to use `--ntasks` (or `--ntasks-per-node`) for MPI jobs.
+  - Need to use both for hybrid jobs with multiple threaded processes (e.g., MPI+openMP or GNU parallel+openMP).
+  - `--ntasks` does not guarantee cores all on a single node
+  
+# Examples
+
+Some common paradigms are:
+
+ - 1 node, many cores
+     - openMP/threaded jobs - 1 task, *c* cores for the task
+     - Python/R/GNU parallel - many tasks, 1 per core at any given time
+ - many nodes, many cores
+     - MPI jobs that use 1 core per task for each of *n* tasks, spread across multiple nodes
+     - Python/R/GNU parallel - many tasks, 1 per core at any given time
+ - hybrid jobs that use *c* cores for each of *n* tasks
+     - e.g., MPI+threaded code
+
+We have lots more [examples of job submission scripts](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/running-your-jobs/scheduler-examples) for different kinds of parallelization (multi-node (MPI), multi-core (openMP), hybrid, etc.
+
+
+# MPI and Slurm
+
+Slurm's "ntasks" corresponds to the number of MPI tasks.
+
+You don't need to specify `-np` or `--machinefile` with `mpirun/mpiexec`. MPI knows about the Slurm job specification.
+
+# MPI troubleshooting
+
+[UNDER CONSTRUCTION]
+
+- Load the compiler module (e.g., `gcc`, `intel`), then load the compiler-specific MPI module (e.g., `openmpi`)
+- The MPI version used to compile code should be the same as used to run the code.
+- The MPI version used inside an Apptainer/Singularity container should be the same as module loaded on the system.
+- Use the `ucx` module for MPI jobs on `savio4_htc` for efficiency (`module load gcc/11.3.0 ucx/1.14.0 openmpi/5.0.0-ucx`)
+- anything to say about pmix?
+- anything to say about MPI jobs within srun sessions?
+
+
+Anything else????
+
+# Using multiple GPUs
+
+- Is your code set up to use multiple GPUs? 
+- `CUDA_VISIBLE_DEVICES` will be set to `0,1,...`.
+
+```
+import torch
+gpu0 = torch.device("cuda:0")
+gpu1 = torch.device("cuda:1")
+
+x = torch.rand(100)
+
+x0 = x.to(gpu0)
+x1 = x.to(gpu1)
+```
+
+# Parallelizing independent computations
+
+You may have many serial jobs to run. It may be more cost-effective and/or simply easier to manage if you collect those jobs together and run them across multiple cores on one or more nodes.
+
+Here are some options:
+
+  - using [GNU parallel](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/running-your-jobs/gnu-parallel/) to run many computational tasks (e.g., thousands of simulations, scanning tens of thousands of parameter values, etc.) as part of single Savio job submission
+  - using [single-node or multi-node parallelism](https://berkeley-scf.github.io/tutorial-parallelization) in Python, R, Julia, MATLAB, etc.
+    - parallel R tools such as *future*, *foreach*, *parLapply*, and *mclapply*
+    - parallel Python tools such as  *ipyparallel*, *Dask*, and *ray*
+    - parallel functionality in MATLAB through *parfor*
+
+# Monitoring running jobs
+
+- Login to the node(s) using `srun --jobid=<JOB_ID> --pty /bin/bash`
+  - Run `top`, `free`, `ps`, etc.
+- `wwall -j <JOB_ID>`
+
+# Troubleshooting failed or misbehaving jobs
+
+- Look at the software's log/output files and Slurm's job/error files (`slurm-<JOB_ID>.out`, `slurm-<JOB_ID>.err`)
+- Possible hardware failures -- use `sacct` to see if repeated failures occur on particular node(s)
+  - Specify nodes with `-w` or exclude with `-x`.
+- Use `sacct` to look at result of failed jobs (memory use, time limit, error codes):
+  `sacct -j <JOB_ID> --format=JobID,JobName,MaxRSS,Elapsed`
+  `sacct -u <USER> -S 2024-04-04 --format User,JobID,JobName,Partition,Account,AllocCPUS,State,MaxRSS,ExitCode,Submit,Start,End,Elapsed,Timelimit,NodeList`
+- Run your code interactively via `srun`
+- Run multi-node jobs on a single node to check for communication issues or issues with modules on additional nodes
+  
