@@ -45,23 +45,11 @@ This training session will cover the following topics:
   - Using MPI and troubleshooting problems
   - Diagnosing job run-time errors
 - Working with Conda/Mamba environments
-    - Setting up environments
-      - Mamba and dependency resolution
-      - Channels (conda-forge, anaconda, nvidia)
-      - Using pip when needed to install within an environment
-      - Creating and using export files
-      - Best practices
-    - Activating environments
-      - source activate vs. conda activate
-      - Environment variables, .env file 
-    - Isolating environments 
-      - Explicitly requesting a Python version to isolate from system base env
-      - Avoiding use of pip packages in ~/.local
-    - Using scratch vs. home
-      - For a specific environment
-      - For ~/.conda (`envs` and `pkgs`)
-    - Setting up Jupyter kernels
-    - Using mamba/conda for non-Python related software
+  - Introduction and Conda vs. Mamba
+  - Creating and isolating environments
+  - Disk space and Conda
+  - Jupyter kernels
+
 
 # Slurm scheduler 
 
