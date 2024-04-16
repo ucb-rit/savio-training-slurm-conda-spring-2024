@@ -1,19 +1,4 @@
-# Introduction
-
-We'll do this in part as a demonstration. We encourage you to login to your account and try out the various examples yourself as we go through them.
-
-Much of this material is based on the extensive Savio documention we have prepared and continue to update, available at [https://docs-research-it.berkeley.edu/services/high-performance-computing/](https://docs-research-it.berkeley.edu/services/high-performance-computing/).
-
-The materials for this tutorial are available using git at the short URL ([tinyurl.com/brc-oct22](https://tinyurl.com/brc-apr24)), the  GitHub URL ([https://github.com/ucb-rit/savio-training-slurm-conda-spring-2024](https://github.com/ucb-rit/savio-training-slurm-conda-spring-2024)), or simply as a [zip file](https://github.com/ucb-rit/savio-training-slurm-conda-spring-2024/archive/main.zip).
-
-
-
-# Outline
-
-[UNDER CONSTRUCTION]
-
-
-
+% Conda/Mamba
 
 # What is Conda?
 
