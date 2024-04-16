@@ -100,10 +100,6 @@ April 18, 2024
   </p>
   <p class="date">Chris Paciorek and Jeffrey Jacob</p>
 </div>
-<div class="slide section level1">
-
-<p>CHECK: savio_debug doesn’t prevent &gt;30 minutes (2h seems fine)</p>
-</div>
 <div id="upcoming-events-and-hiring" class="slide section level1">
 <h1>Upcoming events and hiring</h1>
 <ul>
@@ -129,7 +125,7 @@ through them.</p>
 have prepared and continue to update, available at <a
 href="https://docs-research-it.berkeley.edu/services/high-performance-computing/">https://docs-research-it.berkeley.edu/services/high-performance-computing/</a>.</p>
 <p>The materials for this tutorial are available using git at the short
-URL (<a href="https://tinyurl.com/brc-apr24">tinyurl.com/brc-oct22</a>),
+URL (<a href="https://tinyurl.com/brc-apr24">tinyurl.com/brc-apr24</a>),
 the GitHub URL (<a
 href="https://github.com/ucb-rit/savio-training-slurm-conda-spring-2024">https://github.com/ucb-rit/savio-training-slurm-conda-spring-2024</a>),
 or simply as a <a
@@ -220,6 +216,9 @@ to fairly share Savio.</p>
 <li>Start and monitor jobs on allocated resources</li>
 <li>Manage the queue of pending jobs</li>
 </ol>
+<center>
+<img src="savio_diagram.jpeg">
+</center>
 </div>
 <div id="submitting-jobs-accounts-and-partitions"
 class="slide section level1">
@@ -678,7 +677,8 @@ about the Slurm job specification.</p>
 </div>
 <div id="mpi-troubleshooting" class="slide section level1">
 <h1>MPI troubleshooting</h1>
-<p>[UNDER CONSTRUCTION]</p>
+<p>It’s not uncommon to get MPI run-time errors on Savio that can be
+hard to decipher, particularly when running on multiple nodes.</p>
 <ul>
 <li>Load the compiler module (e.g., <code>gcc</code>,
 <code>intel</code>), then load the compiler-specific MPI module (e.g.,
@@ -687,13 +687,11 @@ about the Slurm job specification.</p>
 run the code.</li>
 <li>The MPI version used inside an Apptainer/Singularity container
 should be the same as module loaded on the system.</li>
-<li>Use the <code>ucx</code> module for MPI jobs on
-<code>savio4_htc</code> for efficiency
-(<code>module load gcc/11.3.0 ucx/1.14.0 openmpi/5.0.0-ucx</code>)</li>
-<li>anything to say about pmix?</li>
-<li>anything to say about MPI jobs within srun sessions?</li>
+<li>Use MPI+UCX for MPI jobs on <code>savio4_htc</code> for efficiency
+(<code>module load gcc/11.3.0 openmpi/5.0.0-ucx</code>)</li>
 </ul>
-<p>Anything else????</p>
+<p>If you troubleshoot based on the above items and are still stuck,
+please contact us.</p>
 </div>
 <div id="using-multiple-gpus" class="slide section level1">
 <h1>Using multiple GPUs</h1>

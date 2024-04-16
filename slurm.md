@@ -2,7 +2,6 @@
 % April 18, 2024
 % Chris Paciorek and Jeffrey Jacob
 
-CHECK: savio_debug doesn't prevent >30 minutes (2h seems fine)
 
 # Upcoming events and hiring
 
@@ -18,7 +17,7 @@ We'll do this in part as a demonstration. We encourage you to login to your acco
 
 Much of this material is based on the extensive Savio documention we have prepared and continue to update, available at [https://docs-research-it.berkeley.edu/services/high-performance-computing/](https://docs-research-it.berkeley.edu/services/high-performance-computing/).
 
-The materials for this tutorial are available using git at the short URL ([tinyurl.com/brc-oct22](https://tinyurl.com/brc-apr24)), the  GitHub URL ([https://github.com/ucb-rit/savio-training-slurm-conda-spring-2024](https://github.com/ucb-rit/savio-training-slurm-conda-spring-2024)), or simply as a [zip file](https://github.com/ucb-rit/savio-training-slurm-conda-spring-2024/archive/main.zip).
+The materials for this tutorial are available using git at the short URL ([tinyurl.com/brc-apr24](https://tinyurl.com/brc-apr24)), the  GitHub URL ([https://github.com/ucb-rit/savio-training-slurm-conda-spring-2024](https://github.com/ucb-rit/savio-training-slurm-conda-spring-2024)), or simply as a [zip file](https://github.com/ucb-rit/savio-training-slurm-conda-spring-2024/archive/main.zip).
 
 # How to get additional help
 
@@ -76,10 +75,15 @@ Savio uses Slurm to:
  2) Start and monitor jobs on allocated resources
  3) Manage the queue of pending jobs
 
+<center><img src="savio_diagram.jpeg"></center>
 
 # Submitting jobs: accounts and partitions
 
-When submitting a job, the main things you need to indicate are the project account you are using and the partition. Note that there is a default value for the project account, but if you have access to multiple accounts such as an FCA and a condo, it's good practice to specify it.
+Generally request:
+
+  - project account (FCA, condo, etc.)
+  - partition (type of node)
+
 
 You can see what accounts you have access to and which partitions within those accounts as follows:
 
@@ -131,7 +135,7 @@ srun: error: Unable to allocate resources: Invalid account or account/partition 
 
 Let's see how to submit a simple job. If your job will only use the resources on a single node, you can do the following. 
 
-Here's an example job script that I'll run. You'll need to modify the `--account` value and possibly the `--partition` value.
+Here's an example job script that I'll run. 
 
 ```bash
 #!/bin/bash
@@ -152,6 +156,8 @@ module load python/3.10.10
 python calc.py >& calc.out
 ```
 
+Note: The number of cores and nodes requested default to 1.
+
 Tip: It's generally a good idea to specify module versions explicitly for reproducibility.
 Default versions will change over time.
 
@@ -160,7 +166,7 @@ Default versions will change over time.
 Now let's submit and monitor the job:
 
 ```
-sbatch job.sh
+sbatch test.sh
 
 squeue -j <JOB_ID>
 
@@ -496,17 +502,14 @@ You don't need to specify `-np` or `--machinefile` with `mpirun/mpiexec`. MPI kn
 
 # MPI troubleshooting
 
-[UNDER CONSTRUCTION]
+It's not uncommon to get MPI run-time errors on Savio that can be hard to decipher, particularly when running on multiple nodes.
 
 - Load the compiler module (e.g., `gcc`, `intel`), then load the compiler-specific MPI module (e.g., `openmpi`)
 - The MPI version used to compile code should be the same as used to run the code.
 - The MPI version used inside an Apptainer/Singularity container should be the same as module loaded on the system.
-- Use the `ucx` module for MPI jobs on `savio4_htc` for efficiency (`module load gcc/11.3.0 ucx/1.14.0 openmpi/5.0.0-ucx`)
-- anything to say about pmix?
-- anything to say about MPI jobs within srun sessions?
+- Use MPI+UCX for MPI jobs on `savio4_htc` for efficiency (`module load gcc/11.3.0 openmpi/5.0.0-ucx`)
 
-
-Anything else????
+If you troubleshoot based on the above items and are still stuck, please contact us.
 
 # Using multiple GPUs
 
