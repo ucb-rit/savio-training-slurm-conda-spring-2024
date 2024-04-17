@@ -5,7 +5,13 @@
 
 # Upcoming events and hiring
 
- - We offer platforms and services for researchers working with [sensitive data](https://docs-research-it.berkeley.edu/services/srdc/)
+ - Cybersecurity for Researchers
+   - Tuesday, October 22, 2024 at 1 pm via Zoom
+   - This brown bag session will focus on secure campus tools and services that Research IT and Berkeley IT offer to researchers, tips on navigating campus security processes, and cybersecurity best practices for keeping your research and research subjects safe.
+   - In partnership with the UC Berkeley Information Security Office and Industry Alliances Office.
+   - Check our [Events & Training page](https://research-it.berkeley.edu/events-trainings/upcoming-events-trainings) for more information about this and other upcoming events.
+
+ - We offer platforms and services for researchers working with [sensitive data](https://docs-research-it.berkeley.edu/services/srdc/).
 
  - Get paid to develop your skills in research data and computing!
    - Berkeley Research Computing is hiring several graduate student Domain Consultants for flexible appointments, 10% to 25% effort (4-10 hours/week). 
@@ -29,10 +35,10 @@ The materials for this tutorial are available using git at the short URL ([tinyu
  - For questions about data management (including HIPAA-protected data):
     - researchdata@berkeley.edu
     - office hours: Wed. 1:30-3:00 and Thur. 9:30-11:00 [on Zoom](https://research-it.berkeley.edu/programs/berkeley-research-computing/research-computing-consulting)
+ - Status & Service Updates
+    - The best way to stay updated on the latest status and updates for the Research IT services is on the front page of the Research IT website. If you are having issues or unsure if one of our services is down, check there first before sending us a ticket. 
 
 # Outline
-
-[UNDER CONSTRUCTION]
 
 This training session will cover the following topics:
 
@@ -81,7 +87,8 @@ sacctmgr -p show associations user=SAVIO_USERNAME
 
 Here's an example of the output for a user who has access to an FCA and a condo.
 ```
-Cluster|Account|User|Partition|Share|GrpJobs|GrpTRES|GrpSubmit|GrpWall|GrpTRESMins|MaxJobs|MaxTRES|MaxTRESPerNode|MaxSubmit|MaxWall|MaxTRESMins|QOS|Def QOS|GrpTRESRunMins|
+Cluster|Account|User|Partition|Share|Priority|GrpJobs|GrpTRES|GrpSubmit|GrpWall|GrpTRESMins|MaxJobs|MaxTRES|MaxTRESPerNode|MaxSubmit|MaxWall|MaxTRESMins|QOS|Def QOS|GrpTRESRunMins|
+brc|ucb|paciorek|ood-inter|1|||||||||||||ood_interactive|ood_interactive||
 brc|fc_paciorek|paciorek|savio4_gpu|1|||||||||||||a5k_gpu4_normal,savio_lowprio|a5k_gpu4_normal||
 brc|fc_paciorek|paciorek|savio4_htc|1|||||||||||||savio_debug,savio_normal|savio_normal||
 brc|fc_paciorek|paciorek|savio3_gpu|1|||||||||||||a40_gpu3_normal,gtx2080_gpu3_normal,savio_lowprio,v100_gpu3_normal|gtx2080_gpu3_normal||
@@ -96,6 +103,8 @@ brc|fc_paciorek|paciorek|savio2_bigmem|1|||||||||||||savio_debug,savio_normal|sa
 brc|fc_paciorek|paciorek|savio2|1|||||||||||||savio_debug,savio_normal|savio_normal||
 brc|fc_paciorek|paciorek|savio|1|||||||||||||savio_debug,savio_normal|savio_normal||
 brc|fc_paciorek|paciorek|savio_bigmem|1|||||||||||||savio_debug,savio_normal|savio_normal||
+brc|co_stat|paciorek|savio3_gpu|1|||||||||||||savio_lowprio|savio_lowprio||
+brc|co_stat|paciorek|savio4_gpu|1|||||||||||||savio_lowprio|savio_lowprio||
 brc|co_stat|paciorek|savio4_htc|1|||||||||||||savio_lowprio|savio_lowprio||
 brc|co_stat|paciorek|savio3_htc|1|||||||||||||savio_lowprio|savio_lowprio||
 brc|co_stat|paciorek|savio3_bigmem|1|||||||||||||savio_lowprio|savio_lowprio||
@@ -115,7 +124,7 @@ If you are part of a condo, you'll notice that you have *low-priority* access to
 In contrast, through my FCA, I have access to the most partitions at normal priority, but not all of them...
 
 ```
-[paciorek@ln002 ~]$ srun -p savio4_gpu -A co_stat --gres=gpu:A5000:1 -t 5:00 --pty bash
+[paciorek@ln002 ~]$ srun -p savio3_xlmem -A co_stat -t 5:00 --pty bash
 srun: error: Unable to allocate resources: Invalid account or account/partition combination specified
 ```
 
@@ -182,12 +191,13 @@ MaxRSS will show the maximum amount of memory that the job used in kilobytes.
 # Specific resources: CPUs (cores)
 
 **Per-core allocations**: For partitions named `_htc` or `_gpu`, jobs are scheduled (and charged) per core. Default one core.
+
 **Per-node allocations**: For other partitions, jobs are given exclusive access to entire node(s) (and your account is charged for all of the cores on the node(s)).
 
 In a few partitions the number of cores differ between machines in the partition. 
 
   - E.g., [in `savio3`, some nodes have 40 cores and some have 32 cores](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/hardware-config/).
-  - To request [particular 'constraints'](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/running-your-jobs/scheduler-config/), you can use `-C`, e.g.,
+  - To request [particular 'features'](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/running-your-jobs/scheduler-config/), you can use `-C`, e.g.,
   
     ```
     srun -p savio3 -C savio3_c40 -A ac_scsguest --pty -t 5:00 bash  # 40 cores
@@ -207,7 +217,7 @@ You generally should not request a particular amount of memory:
 
 GPU technology is advancing fast. As a result, it's hard to maintain a large, homogeneous pool of [GPU nodes](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/hardware-config).
 
-- `savio2_gpu` has old K80 GPUs.
+- `savio2_gpu` has (old) K80 GPUs.
 - `savio3_gpu` has GTX2080TI, TITAN RTX, V100, and A40 nodes.
 - `savio4_gpu` has A5000 nodes.
 
@@ -226,25 +236,6 @@ sbatch -A fc_foo -p savio3_gpu --gres=gpu:A40:2 -c 16 -t 60:00 job.sh
 
 `CUDA_VISIBLE_DEVICES` will be set to `0,....` (i.e., "internal" numbering within job).
 
-# Monitoring jobs, the job queue, and overall usage
-
-The basic command for seeing what is running on the system is `squeue`:
-```
-squeue
-squeue -u $USER
-squeue -A co_stat
-```
-
-To see what nodes are available in a given partition:
-```
-sinfo -p savio3
-sinfo -p savio2_gpu
-```
-
-For more information on cores, QoS, and additional (e.g., GPU) resources, here's some syntax:
-```
-squeue -o "%.7i %.12P %.20j %.8u %.2t %.5C %.5D %.12M %.12l %.14r %.8p %.20q %.12b %.20R"
-```
 
 
 # Submission problems - obvious failures
@@ -261,7 +252,7 @@ squeue -o "%.7i %.12P %.20j %.8u %.2t %.5C %.5D %.12M %.12l %.14r %.8p %.20q %.1
 
 Frustratingly, some submissions can simply hang. They will never start but do not give an error message.
 
-- Time limit too long (e.g., more than 1 hour in `savio_debug` queue or more than 72 hours FCA job in `savio_normal`:
+- Time limit too long (e.g., more than 3 hours in `savio_debug` queue or more than 72 hours FCA job in `savio_normal`:
 
 ```
 [paciorek@ln002 ~]$ srun -A ac_scsguest  -t 74:00:00 -p savio3_htc --pty bash
@@ -294,6 +285,25 @@ Frustratingly, some submissions can simply hang. They will never start but do no
 1809336   savio4_gpu                 bash paciorek PD     4     1         0:00         5:00     QOSMinGRES 0.000108      a5k_gpu4_normal   gres:gpu:1         (QOSMinGRES)
 ```
 
+# Monitoring jobs, the job queue, and overall usage
+
+The basic command for seeing what is running on the system is `squeue`:
+```
+squeue
+squeue -u $USER
+squeue -A co_stat
+```
+
+To see what nodes are available in a given partition:
+```
+sinfo -p savio3
+sinfo -p savio2_gpu
+```
+
+For more information on cores, QoS, and additional (e.g., GPU) resources, here's some syntax:
+```
+squeue -o "%.7i %.12P %.20j %.8u %.2t %.5C %.5D %.12M %.12l %.14r %.8p %.20q %.12b %.20R"
+```
 
 
 # Waiting in the queue
@@ -303,18 +313,19 @@ Tools to diagnose queueing situations:
   - Our `sq` tool, which wraps `squeue`.
   - `sinfo -p savio3_htc`
   - `squeue`
-    - `squeue --state=PD`
+    - `--state=PD` may be a helpful flag.
 
 
 [Reasons your job might sit in the queue](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/running-your-jobs/why-job-not-run/):
 
   - The partition may be fully occupied (`Priority`, `Resources`). 
-  - Your condo may be fully utilizing its purchased resources (`QOSGrpCpuLimit`).
-  - The total number of FCA jobs in small partitions may be at its limit (`QOSGrpCpuLimit`).
+  - Your condo may be fully utilizing its purchased resources (`QOSGrpCpuLimit`, `QOSGrpNodeLimit`).
+  - The total number of FCA jobs in small partitions may be at its limit (`QOSGrpCpuLimit`, `QOSGrpNodeLimit`).
   - Slurm's fair share policy will prioritize less-active FCA groups (and less-active users) (`Priority`).
   - FCA jobs have lower priority than condo jobs (`Priority`).
   - Your time limit may overlap with a scheduled downtime (`ReqNodeNotAvail, Reserved for Maintenance`).
   
+Let's experiment with submitting jobs to heavily-used partitions and see what the queue looks like.
 
 
 # How the queue works
@@ -323,7 +334,7 @@ Tools to diagnose queueing situations:
 
   - Condo jobs get top priority and will go to the top of the queue.
     - Users within a condo will be prioritized inversely to recent usage.
-  - FCAs (and then users within FCAs) prioritized inversely to recent usage (see the `PRIORITY` column of `squeue`.
+  - FCAs (and then users within FCAs) prioritized inversely to recent usage (see the `PRIORITY` column of `squeue`).
 
 - Backfilling
 
@@ -435,13 +446,15 @@ Some flavors of parallelization:
 
 - single node only:
   - threaded code (e.g., `openMP`, `TBB`)
-  - threaded linear algebra in Python/numpy, R, Julia, etc. (uses `openMP` or `MKL`)
+  - threaded linear algebra in Python/numpy, R, Julia, etc. (uses `openMP` or `MKL`), e.g., our `test.sh` example earlier
 - one or more nodes:
-  - parallel loops, parallel maps in Python, R, etc. (usually one process per worker)
+  - parallel loops, parallel maps in Python, R, etc. (usually one Linux process per worker)
      - Python: `dask`, `ray`, `ipyparallel` packages
      - R: `future`, `parallel`, `foreach` packages
-  - MPI (message-passing): single- and multiple-node
-  - [GNU parallel](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/running-your-jobs/gnu-parallel/): parallelize independent tasks: single- and multiple-node
+  - MPI (message-passing)
+  - [GNU parallel](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/running-your-jobs/gnu-parallel/): parallelize independent tasks
+  
+Various other executables (e.g., in bioinformatics, computational chemistry, computational fluid mechanics, etc.) will use various of these approaches internally.
 
 # Parallelization considerations
 
@@ -449,12 +462,14 @@ Rules-of-thumb:
 
 - Often one core per process (i.e., "worker")
   - Multiple cores per process for threaded code
-- One or more task (computational piece) per worker
+  - Avoid having multiple processes per core
+- One or more computational units per worker
 
+Confusing: "task" could mean "worker" in the context of MPI or "computational unit" more generally.
 
 Important:
 
-- Is code written so as to use parallelization?
+- Is the executable you're using written so as to use parallelization?
 - What does the user need to specify?
   - Sometimes multi-core, single-node parallelization will occur without user specification.
 
@@ -486,12 +501,12 @@ Caveats:
 
 Some common paradigms are:
 
- - 1 node, many cores
-     - openMP/threaded jobs - 1 task, *c* cores for the task
-     - Python/R/GNU parallel - many tasks, 1 per core at any given time
+ - one node, many cores
+     - openMP/threaded jobs - one task, *c* cores for the task
+     - Python/R/GNU parallel - *n* tasks, one per core at any given time, often more computational units than tasks
  - many nodes, many cores
-     - MPI jobs that use 1 core per task for each of *n* tasks, spread across multiple nodes
-     - Python/R/GNU parallel - many tasks, 1 per core at any given time
+     - MPI jobs that use one core per task for each of *n* tasks, spread across multiple nodes
+     - Python/R/GNU parallel - *n* tasks, one per core at any given time, often more computational units than tasks
  - hybrid jobs that use *c* cores for each of *n* tasks
      - e.g., MPI+threaded code
 
@@ -502,7 +517,9 @@ We have lots more [examples of job submission scripts](https://docs-research-it.
 
 Slurm's "ntasks" corresponds to the number of MPI tasks.
 
-You don't need to specify `-np` or `--machinefile` with `mpirun/mpiexec`. MPI knows about the Slurm job specification.
+MPI knows about the Slurm job specification.
+ 
+So you don't need to specify `-np` or `--machinefile` with `mpirun/mpiexec`.
 
 # MPI troubleshooting
 
@@ -518,7 +535,8 @@ If you troubleshoot based on the above items and are still stuck, please contact
 # Using multiple GPUs
 
 - Is your code set up to use multiple GPUs? 
-- `CUDA_VISIBLE_DEVICES` will be set to `0,1,...`.
+- `CUDA_VISIBLE_DEVICES` will be set when your job starts.
+- With PyTorch, you will refer to the GPUs indexed starting with 0.
 
 ```
 import torch
@@ -554,4 +572,4 @@ Here are some options:
   - Specify nodes with `-w` or exclude with `-x`.
 - Run your code interactively via `srun`
 - Run multi-node jobs on a single node to check for communication issues or issues with modules on additional nodes
-  
+- Contact us if you're stuck.  

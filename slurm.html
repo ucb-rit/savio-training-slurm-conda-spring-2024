@@ -103,9 +103,23 @@ April 18, 2024
 <div id="upcoming-events-and-hiring" class="slide section level1">
 <h1>Upcoming events and hiring</h1>
 <ul>
+<li><p>Cybersecurity for Researchers</p>
+<ul>
+<li>Tuesday, October 22, 2024 at 1 pm via Zoom</li>
+<li>This brown bag session will focus on secure campus tools and
+services that Research IT and Berkeley IT offer to researchers, tips on
+navigating campus security processes, and cybersecurity best practices
+for keeping your research and research subjects safe.</li>
+<li>In partnership with the UC Berkeley Information Security Office and
+Industry Alliances Office.</li>
+<li>Check our <a
+href="https://research-it.berkeley.edu/events-trainings/upcoming-events-trainings">Events
+&amp; Training page</a> for more information about this and other
+upcoming events.</li>
+</ul></li>
 <li><p>We offer platforms and services for researchers working with <a
 href="https://docs-research-it.berkeley.edu/services/srdc/">sensitive
-data</a></p></li>
+data</a>.</p></li>
 <li><p>Get paid to develop your skills in research data and
 computing!</p>
 <ul>
@@ -155,11 +169,17 @@ data):
 href="https://research-it.berkeley.edu/programs/berkeley-research-computing/research-computing-consulting">on
 Zoom</a></li>
 </ul></li>
+<li>Status &amp; Service Updates
+<ul>
+<li>The best way to stay updated on the latest status and updates for
+the Research IT services is on the front page of the Research IT
+website. If you are having issues or unsure if one of our services is
+down, check there first before sending us a ticket.</li>
+</ul></li>
 </ul>
 </div>
 <div id="outline" class="slide section level1">
 <h1>Outline</h1>
-<p>[UNDER CONSTRUCTION]</p>
 <p>This training session will cover the following topics:</p>
 <ul>
 <li>Slurm tips and tricks
@@ -211,7 +231,8 @@ within those accounts as follows:</p>
 <pre><code>sacctmgr -p show associations user=SAVIO_USERNAME</code></pre>
 <p>Here’s an example of the output for a user who has access to an FCA
 and a condo.</p>
-<pre><code>Cluster|Account|User|Partition|Share|GrpJobs|GrpTRES|GrpSubmit|GrpWall|GrpTRESMins|MaxJobs|MaxTRES|MaxTRESPerNode|MaxSubmit|MaxWall|MaxTRESMins|QOS|Def QOS|GrpTRESRunMins|
+<pre><code>Cluster|Account|User|Partition|Share|Priority|GrpJobs|GrpTRES|GrpSubmit|GrpWall|GrpTRESMins|MaxJobs|MaxTRES|MaxTRESPerNode|MaxSubmit|MaxWall|MaxTRESMins|QOS|Def QOS|GrpTRESRunMins|
+brc|ucb|paciorek|ood-inter|1|||||||||||||ood_interactive|ood_interactive||
 brc|fc_paciorek|paciorek|savio4_gpu|1|||||||||||||a5k_gpu4_normal,savio_lowprio|a5k_gpu4_normal||
 brc|fc_paciorek|paciorek|savio4_htc|1|||||||||||||savio_debug,savio_normal|savio_normal||
 brc|fc_paciorek|paciorek|savio3_gpu|1|||||||||||||a40_gpu3_normal,gtx2080_gpu3_normal,savio_lowprio,v100_gpu3_normal|gtx2080_gpu3_normal||
@@ -226,6 +247,8 @@ brc|fc_paciorek|paciorek|savio2_bigmem|1|||||||||||||savio_debug,savio_normal|sa
 brc|fc_paciorek|paciorek|savio2|1|||||||||||||savio_debug,savio_normal|savio_normal||
 brc|fc_paciorek|paciorek|savio|1|||||||||||||savio_debug,savio_normal|savio_normal||
 brc|fc_paciorek|paciorek|savio_bigmem|1|||||||||||||savio_debug,savio_normal|savio_normal||
+brc|co_stat|paciorek|savio3_gpu|1|||||||||||||savio_lowprio|savio_lowprio||
+brc|co_stat|paciorek|savio4_gpu|1|||||||||||||savio_lowprio|savio_lowprio||
 brc|co_stat|paciorek|savio4_htc|1|||||||||||||savio_lowprio|savio_lowprio||
 brc|co_stat|paciorek|savio3_htc|1|||||||||||||savio_lowprio|savio_lowprio||
 brc|co_stat|paciorek|savio3_bigmem|1|||||||||||||savio_lowprio|savio_lowprio||
@@ -246,7 +269,7 @@ those, but I can also burst beyond the condo and use other partitions at
 low priority.</p>
 <p>In contrast, through my FCA, I have access to the most partitions at
 normal priority, but not all of them…</p>
-<pre><code>[paciorek@ln002 ~]$ srun -p savio4_gpu -A co_stat --gres=gpu:A5000:1 -t 5:00 --pty bash
+<pre><code>[paciorek@ln002 ~]$ srun -p savio3_xlmem -A co_stat -t 5:00 --pty bash
 srun: error: Unable to allocate resources: Invalid account or account/partition combination specified</code></pre>
 </div>
 <div id="submitting-a-batch-job" class="slide section level1">
@@ -300,9 +323,10 @@ kilobytes.</p>
 <h1>Specific resources: CPUs (cores)</h1>
 <p><strong>Per-core allocations</strong>: For partitions named
 <code>_htc</code> or <code>_gpu</code>, jobs are scheduled (and charged)
-per core. Default one core. <strong>Per-node allocations</strong>: For
-other partitions, jobs are given exclusive access to entire node(s) (and
-your account is charged for all of the cores on the node(s)).</p>
+per core. Default one core.</p>
+<p><strong>Per-node allocations</strong>: For other partitions, jobs are
+given exclusive access to entire node(s) (and your account is charged
+for all of the cores on the node(s)).</p>
 <p>In a few partitions the number of cores differ between machines in
 the partition.</p>
 <ul>
@@ -312,7 +336,7 @@ href="https://docs-research-it.berkeley.edu/services/high-performance-computing/
 cores</a>.</p></li>
 <li><p>To request <a
 href="https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/running-your-jobs/scheduler-config/">particular
-‘constraints’</a>, you can use <code>-C</code>, e.g.,</p>
+‘features’</a>, you can use <code>-C</code>, e.g.,</p>
 <pre><code>srun -p savio3 -C savio3_c40 -A ac_scsguest --pty -t 5:00 bash  # 40 cores
 srun -p savio3 -C savio3 -A ac_scsguest --pty -t 5:00 bash      # 32 cores</code></pre></li>
 </ul>
@@ -341,7 +365,7 @@ a large, homogeneous pool of <a
 href="https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/hardware-config">GPU
 nodes</a>.</p>
 <ul>
-<li><code>savio2_gpu</code> has old K80 GPUs.</li>
+<li><code>savio2_gpu</code> has (old) K80 GPUs.</li>
 <li><code>savio3_gpu</code> has GTX2080TI, TITAN RTX, V100, and A40
 nodes.</li>
 <li><code>savio4_gpu</code> has A5000 nodes.</li>
@@ -361,21 +385,6 @@ sbatch -A fc_foo -p savio3_gpu --gres=gpu:A40:2 -c 16 -t 60:00 job.sh</code></pr
 <p><code>CUDA_VISIBLE_DEVICES</code> will be set to <code>0,....</code>
 (i.e., “internal” numbering within job).</p>
 </div>
-<div id="monitoring-jobs-the-job-queue-and-overall-usage"
-class="slide section level1">
-<h1>Monitoring jobs, the job queue, and overall usage</h1>
-<p>The basic command for seeing what is running on the system is
-<code>squeue</code>:</p>
-<pre><code>squeue
-squeue -u $USER
-squeue -A co_stat</code></pre>
-<p>To see what nodes are available in a given partition:</p>
-<pre><code>sinfo -p savio3
-sinfo -p savio2_gpu</code></pre>
-<p>For more information on cores, QoS, and additional (e.g., GPU)
-resources, here’s some syntax:</p>
-<pre><code>squeue -o &quot;%.7i %.12P %.20j %.8u %.2t %.5C %.5D %.12M %.12l %.14r %.8p %.20q %.12b %.20R&quot;</code></pre>
-</div>
 <div id="submission-problems---obvious-failures"
 class="slide section level1">
 <h1>Submission problems - obvious failures</h1>
@@ -394,7 +403,7 @@ class="slide section level1">
 <p>Frustratingly, some submissions can simply hang. They will never
 start but do not give an error message.</p>
 <ul>
-<li>Time limit too long (e.g., more than 1 hour in
+<li>Time limit too long (e.g., more than 3 hours in
 <code>savio_debug</code> queue or more than 72 hours FCA job in
 <code>savio_normal</code>:</li>
 </ul>
@@ -424,6 +433,21 @@ start but do not give an error message.</p>
   JOBID    PARTITION                 NAME     USER ST  CPUS NODES         TIME   TIME_LIMIT         REASON PRIORITY                  QOS TRES_PER_NOD     NODELIST(REASON)
 1809336   savio4_gpu                 bash paciorek PD     4     1         0:00         5:00     QOSMinGRES 0.000108      a5k_gpu4_normal   gres:gpu:1         (QOSMinGRES)</code></pre>
 </div>
+<div id="monitoring-jobs-the-job-queue-and-overall-usage"
+class="slide section level1">
+<h1>Monitoring jobs, the job queue, and overall usage</h1>
+<p>The basic command for seeing what is running on the system is
+<code>squeue</code>:</p>
+<pre><code>squeue
+squeue -u $USER
+squeue -A co_stat</code></pre>
+<p>To see what nodes are available in a given partition:</p>
+<pre><code>sinfo -p savio3
+sinfo -p savio2_gpu</code></pre>
+<p>For more information on cores, QoS, and additional (e.g., GPU)
+resources, here’s some syntax:</p>
+<pre><code>squeue -o &quot;%.7i %.12P %.20j %.8u %.2t %.5C %.5D %.12M %.12l %.14r %.8p %.20q %.12b %.20R&quot;</code></pre>
+</div>
 <div id="waiting-in-the-queue" class="slide section level1">
 <h1>Waiting in the queue</h1>
 <p>Tools to diagnose queueing situations:</p>
@@ -432,7 +456,7 @@ start but do not give an error message.</p>
 <li><code>sinfo -p savio3_htc</code></li>
 <li><code>squeue</code>
 <ul>
-<li><code>squeue --state=PD</code></li>
+<li><code>--state=PD</code> may be a helpful flag.</li>
 </ul></li>
 </ul>
 <p><a
@@ -442,9 +466,9 @@ your job might sit in the queue</a>:</p>
 <li>The partition may be fully occupied (<code>Priority</code>,
 <code>Resources</code>).</li>
 <li>Your condo may be fully utilizing its purchased resources
-(<code>QOSGrpCpuLimit</code>).</li>
+(<code>QOSGrpCpuLimit</code>, <code>QOSGrpNodeLimit</code>).</li>
 <li>The total number of FCA jobs in small partitions may be at its limit
-(<code>QOSGrpCpuLimit</code>).</li>
+(<code>QOSGrpCpuLimit</code>, <code>QOSGrpNodeLimit</code>).</li>
 <li>Slurm’s fair share policy will prioritize less-active FCA groups
 (and less-active users) (<code>Priority</code>).</li>
 <li>FCA jobs have lower priority than condo jobs
@@ -452,6 +476,8 @@ your job might sit in the queue</a>:</p>
 <li>Your time limit may overlap with a scheduled downtime
 (<code>ReqNodeNotAvail, Reserved for Maintenance</code>).</li>
 </ul>
+<p>Let’s experiment with submitting jobs to heavily-used partitions and
+see what the queue looks like.</p>
 </div>
 <div id="how-the-queue-works" class="slide section level1">
 <h1>How the queue works</h1>
@@ -464,7 +490,8 @@ your job might sit in the queue</a>:</p>
 usage.</li>
 </ul></li>
 <li>FCAs (and then users within FCAs) prioritized inversely to recent
-usage (see the <code>PRIORITY</code> column of <code>squeue</code>.</li>
+usage (see the <code>PRIORITY</code> column of
+<code>squeue</code>).</li>
 </ul></li>
 <li><p>Backfilling</p>
 <ul>
@@ -600,11 +627,12 @@ full.</li>
 <ul>
 <li>threaded code (e.g., <code>openMP</code>, <code>TBB</code>)</li>
 <li>threaded linear algebra in Python/numpy, R, Julia, etc. (uses
-<code>openMP</code> or <code>MKL</code>)</li>
+<code>openMP</code> or <code>MKL</code>), e.g., our <code>test.sh</code>
+example earlier</li>
 </ul></li>
 <li>one or more nodes:
 <ul>
-<li>parallel loops, parallel maps in Python, R, etc. (usually one
+<li>parallel loops, parallel maps in Python, R, etc. (usually one Linux
 process per worker)
 <ul>
 <li>Python: <code>dask</code>, <code>ray</code>,
@@ -612,13 +640,15 @@ process per worker)
 <li>R: <code>future</code>, <code>parallel</code>, <code>foreach</code>
 packages</li>
 </ul></li>
-<li>MPI (message-passing): single- and multiple-node</li>
+<li>MPI (message-passing)</li>
 <li><a
 href="https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/running-your-jobs/gnu-parallel/">GNU
-parallel</a>: parallelize independent tasks: single- and
-multiple-node</li>
+parallel</a>: parallelize independent tasks</li>
 </ul></li>
 </ul>
+<p>Various other executables (e.g., in bioinformatics, computational
+chemistry, computational fluid mechanics, etc.) will use various of
+these approaches internally.</p>
 </div>
 <div id="parallelization-considerations" class="slide section level1">
 <h1>Parallelization considerations</h1>
@@ -627,12 +657,16 @@ multiple-node</li>
 <li>Often one core per process (i.e., “worker”)
 <ul>
 <li>Multiple cores per process for threaded code</li>
+<li>Avoid having multiple processes per core</li>
 </ul></li>
-<li>One or more task (computational piece) per worker</li>
+<li>One or more computational units per worker</li>
 </ul>
+<p>Confusing: “task” could mean “worker” in the context of MPI or
+“computational unit” more generally.</p>
 <p>Important:</p>
 <ul>
-<li>Is code written so as to use parallelization?</li>
+<li>Is the executable you’re using written so as to use
+parallelization?</li>
 <li>What does the user need to specify?
 <ul>
 <li>Sometimes multi-core, single-node parallelization will occur without
@@ -679,18 +713,18 @@ threaded processes (e.g., MPI+openMP or GNU parallel+openMP).</li>
 <h1>Examples</h1>
 <p>Some common paradigms are:</p>
 <ul>
-<li>1 node, many cores
+<li>one node, many cores
 <ul>
-<li>openMP/threaded jobs - 1 task, <em>c</em> cores for the task</li>
-<li>Python/R/GNU parallel - many tasks, 1 per core at any given
-time</li>
+<li>openMP/threaded jobs - one task, <em>c</em> cores for the task</li>
+<li>Python/R/GNU parallel - <em>n</em> tasks, one per core at any given
+time, often more computational units than tasks</li>
 </ul></li>
 <li>many nodes, many cores
 <ul>
-<li>MPI jobs that use 1 core per task for each of <em>n</em> tasks,
+<li>MPI jobs that use one core per task for each of <em>n</em> tasks,
 spread across multiple nodes</li>
-<li>Python/R/GNU parallel - many tasks, 1 per core at any given
-time</li>
+<li>Python/R/GNU parallel - <em>n</em> tasks, one per core at any given
+time, often more computational units than tasks</li>
 </ul></li>
 <li>hybrid jobs that use <em>c</em> cores for each of <em>n</em> tasks
 <ul>
@@ -705,9 +739,9 @@ of job submission scripts</a> for different kinds of parallelization
 <div id="mpi-and-slurm" class="slide section level1">
 <h1>MPI and Slurm</h1>
 <p>Slurm’s “ntasks” corresponds to the number of MPI tasks.</p>
-<p>You don’t need to specify <code>-np</code> or
-<code>--machinefile</code> with <code>mpirun/mpiexec</code>. MPI knows
-about the Slurm job specification.</p>
+<p>MPI knows about the Slurm job specification.</p>
+<p>So you don’t need to specify <code>-np</code> or
+<code>--machinefile</code> with <code>mpirun/mpiexec</code>.</p>
 </div>
 <div id="mpi-troubleshooting" class="slide section level1">
 <h1>MPI troubleshooting</h1>
@@ -731,8 +765,10 @@ please contact us.</p>
 <h1>Using multiple GPUs</h1>
 <ul>
 <li>Is your code set up to use multiple GPUs?</li>
-<li><code>CUDA_VISIBLE_DEVICES</code> will be set to
-<code>0,1,...</code>.</li>
+<li><code>CUDA_VISIBLE_DEVICES</code> will be set when your job
+starts.</li>
+<li>With PyTorch, you will refer to the GPUs indexed starting with
+0.</li>
 </ul>
 <pre><code>import torch
 gpu0 = torch.device(&quot;cuda:0&quot;)
@@ -790,6 +826,7 @@ repeated failures occur on particular node(s)
 <li>Run your code interactively via <code>srun</code></li>
 <li>Run multi-node jobs on a single node to check for communication
 issues or issues with modules on additional nodes</li>
+<li>Contact us if you’re stuck.</li>
 </ul>
 </div>
 </body>
