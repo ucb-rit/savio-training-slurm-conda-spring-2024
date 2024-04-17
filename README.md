@@ -23,3 +23,5 @@ Participants less familiar with operating in a UNIX-style command-line shell env
 
 - `https://swcarpentry.github.io/shell-novice`
 - `https://berkeley-scf.github.io/tutorial-unix-basics`
+
+<center><img src="rit-logo.png"></center>
