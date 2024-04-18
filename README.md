@@ -1,10 +1,11 @@
-# savio-training-slurm-conda-spring-2024
+# Savio intermediate training: 
+# Tips and tricks -- making the most of the Slurm scheduler and of Mamba/Conda environments
 
 Materials for Savio intermediate training on Slurm and Conda/Mamba, April 18, 2024.
 
 ## Material on the web / in html
 
-You can see this (very basic) webpage for the training at [https://tinyurl.com/brc-apr24-web].
+You can see this (very basic) webpage for the training at [https://tinyurl.com/brc-apr24-web]()
 
   - To directly view the Slurm materials as a single page, please [click here](https://htmlpreview.github.io/?https://github.com/ucb-rit/savio-training-slurm-conda-spring-2024/blob/main/slurm.html).
   - To directly view the Conda materials as a single page, please [click here](https://htmlpreview.github.io/?https://github.com/ucb-rit/savio-training-slurm-conda-spring-2024/blob/main/conda.html).
