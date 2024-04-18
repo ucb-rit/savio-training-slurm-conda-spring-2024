@@ -5,22 +5,22 @@
 
 # What is Conda?
 
-- Conda is an open source package and environment management system 
-- If you are installing it on your local machine you can pick between Miniconda and Anaconda 
-- Conda can manage packages for a wide variety of programming languages but is most often used with python
+- Conda is an open source package and environment management system.
+- If you are installing Conda on your local machine you can pick between Miniconda and Anaconda.
+- Conda can manage packages for a wide variety of programming languages but is most often used with Python.
 - works well across multiple platforms (macOS, Windows, Linux)
 
 # What are Conda Environments?
 
-- Conda environments are isolated spaces created within Conda that allow users to use and manage different versions of Python and packages
-- Each environment can have its own set of packages without affecting other environments
-- Environemnts ensure reproducibility of code and help avoid conflicts between package versions
+- Conda environments are isolated spaces created within Conda that allow users to use and manage different versions of Python and packages.
+- Each Conda environment can have its own set of packages without affecting other environments.
+- Environemnts ensure reproducibility of code and help avoid conflicts between package versions.
 
 <center><img src="conda_illustration.png"></center>
 (Image from https://nbisweden.github.io/excelerate-scRNAseq/conda_instructions.html)
 
 # Conda Vs Mamba
-- Conda may be slow at times
+- Conda may be slow at times.
 - Mamba is a faster drop in replacement for conda which is implemented in c++ and takes advantage of parallel loading.
 - Mamba and Conda can be used interchangably just change the prefix conda to mamba for each command.
 
@@ -154,7 +154,7 @@ If you find that you are using packages from `~local` you can reinstall them in 
 
 # Creating and Using Export Files
 
-- Part of the reason Conda is so popular is the ability to share environments with anyone, streamlining the development process
+- Part of the reason Conda is so popular is the ability to share environments with anyone streamlining the development process.
 - the actual export file is written in `yaml` and dictates how the environment should be set up, here is an example of what one may look like:
 
 ```yml
