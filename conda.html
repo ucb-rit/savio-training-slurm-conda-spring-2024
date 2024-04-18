@@ -106,11 +106,11 @@ April 18, 2024
 <h1>What is Conda?</h1>
 <ul>
 <li>Conda is an open source package and environment management
-system</li>
-<li>If you are installing it on your local machine you can pick between
-Miniconda and Anaconda</li>
+system.</li>
+<li>If you are installing Conda on your local machine you can pick
+between Miniconda and Anaconda.</li>
 <li>Conda can manage packages for a wide variety of programming
-languages but is most often used with python</li>
+languages but is most often used with Python.</li>
 <li>works well across multiple platforms (macOS, Windows, Linux)</li>
 </ul>
 </div>
@@ -119,11 +119,11 @@ languages but is most often used with python</li>
 <ul>
 <li>Conda environments are isolated spaces created within Conda that
 allow users to use and manage different versions of Python and
-packages</li>
-<li>Each environment can have its own set of packages without affecting
-other environments</li>
+packages.</li>
+<li>Each Conda environment can have its own set of packages without
+affecting other environments.</li>
 <li>Environemnts ensure reproducibility of code and help avoid conflicts
-between package versions</li>
+between package versions.</li>
 </ul>
 <center>
 <img src="conda_illustration.png">
@@ -134,18 +134,18 @@ https://nbisweden.github.io/excelerate-scRNAseq/conda_instructions.html)</p>
 <div id="conda-vs-mamba" class="slide section level1">
 <h1>Conda Vs Mamba</h1>
 <ul>
-<li>Conda may be slow at times</li>
+<li>Conda may be slow at times.</li>
 <li>Mamba is a faster drop in replacement for conda which is implemented
-in c++ and takes advantage of parallel loading</li>
+in c++ and takes advantage of parallel loading.</li>
 <li>Mamba and Conda can be used interchangably just change the prefix
-conda to mamba for each command</li>
+conda to mamba for each command.</li>
 </ul>
 <p>Mamba can be installed like such, remember you may need to install it
 again inside your conda environment as conda environments are blank
 slates</p>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="ex">conda</span> install mamba <span class="at">-c</span> conda-forge</span></code></pre></div>
-<p>Note: as Savio upgrades to the Rocky8 operating system (in the coming
+<p>Note: As Savio upgrades to the Rocky8 operating system (in the coming
 months) mamba can be set as the default solver in conda by doing the
 following in your base environment:</p>
 <div class="sourceCode" id="cb2"><pre
@@ -214,9 +214,9 @@ base                     /global/software/sl-7.x86_64/modules/langs/python/3.10<
 stored common channels include:
 <ul>
 <li>Anaconda: The default channel, it hosts a large number of packages
-and is considered stable</li>
+and is considered stable.</li>
 <li>conda-forge: A Community driven channel that has a larger number of
-packages than anaconda and often has newer versions</li>
+packages than anaconda and often has newer versions.</li>
 <li>nvidia: This channel is specifically for packages optimized for
 NVIDIA hardware, like GPU-accelerated libraries.</li>
 </ul></li>
@@ -238,8 +238,8 @@ or <code>conda/mamba activate</code></p></li>
 href="https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/software/using-software/using-python-savio/">recomended
 on Savio</a> as using conda activate might require the use of
 <code>conda init</code> which can alter ther shell behavior due to
-odifiying .bashrc conda may now attempt to start a base environment when
-logging into the shell causing slowdowns.</p></li>
+modifiying <code>.bashrc</code> conda may now attempt to start a base
+environment when logging into the shell causing slowdowns.</p></li>
 <li><p>If you do use conda init you can stop base environment setup with
 the following:</p></li>
 </ul>
@@ -257,7 +257,7 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href=
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="bu">source</span> deactivate</span></code></pre></div>
 <p>Finally we can delete our environment if we no longer need it</p>
 <div class="sourceCode" id="cb12"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="ex">mamba</span> remove <span class="at">--name</span> test_env <span class="at">--all</span></span></code></pre></div>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="ex">mamba</span> remove <span class="at">--name</span> test_env2 <span class="at">--all</span></span></code></pre></div>
 </div>
 <div id="installing-packages-via-pip-and-isolating-environments"
 class="slide section level1">
@@ -273,7 +273,8 @@ package as pip and conda may resolve dependancies differently.</li>
 will be confined to the environment, avoiding impacts on the global
 <code>~/.local directory</code>.</p>
 <div class="sourceCode" id="cb13"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="ex">pip</span> install black</span></code></pre></div>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="bu">source</span> activate test_env</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="ex">pip</span> install black</span></code></pre></div>
 <p>It is important to note a Conda environment may not be completely
 isolated if it uses packages installed in the user’s home directory
 <code>~/.local</code>, this can happen when packages were installed
@@ -291,7 +292,7 @@ its own isolated versions of those packages</p>
 <h1>Creating and Using Export Files</h1>
 <ul>
 <li>Part of the reason Conda is so popular is the ability to share
-environments with anyone, streamlining the development process</li>
+environments with anyone streamlining the development process.</li>
 <li>the actual export file is written in <code>yaml</code> and dictates
 how the environment should be set up, here is an example of what one may
 look like:</li>
@@ -398,7 +399,7 @@ customize how Conda behaves.
 </ul></li>
 </ul>
 <p>Many of the commands we’ve used throughout this demo have modified
-<code>.condarc</code> with our channel config being one</p>
+<code>.condarc</code> ie. our channel config</p>
 <div class="sourceCode" id="cb26"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a><span class="ex">conda</span> config <span class="at">--add</span> channels conda-forge</span>
 <span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a><span class="ex">conda</span> config <span class="at">--set</span> channel_priority strict</span></code></pre></div>
