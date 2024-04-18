@@ -108,7 +108,10 @@ April 18, 2024
 <li>Conda is an open source package and environment management
 system.</li>
 <li>If you are installing Conda on your local machine you can pick
-between Miniconda and Anaconda.</li>
+between Miniconda and Anaconda.
+<ul>
+<li>pre-installed on Savio</li>
+</ul></li>
 <li>Conda can manage packages for a wide variety of programming
 languages but is most often used with Python.</li>
 <li>works well across multiple platforms (macOS, Windows, Linux)</li>
@@ -303,7 +306,7 @@ class="sourceCode yml"><code class="sourceCode yaml"><span id="cb15-1"><a href="
 <span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> conda-forge</span></span>
 <span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> defaults</span></span>
 <span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="fu">dependencies</span><span class="kw">:</span></span>
-<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> numpy</span></span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> black</span></span>
 <span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> python=3.10</span></span>
 <span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">pip</span><span class="kw">:</span></span>
 <span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> flake8</span></span></code></pre></div>
@@ -355,10 +358,10 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href=
 <p>This environment can be activated from anywhere on Savio like
 such:</p>
 <div class="sourceCode" id="cb21"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="bu">source</span> activate /global/scratch/users/jejacob/envs/scratch_myenv </span></code></pre></div>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="bu">source</span> activate /global/scratch/users/jejacob/conda/scratch_myenv </span></code></pre></div>
 <p>Lastly to expedite the proccess you can move your <code>.conda</code>
-directory itself to scratch and using a Symbolic Link to preserve the
-file paths</p>
+directory itself to scratch and use a Symbolic Link to preserve the file
+paths</p>
 <div class="sourceCode" id="cb22"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="fu">mv</span> /global/home/users/user_name/.conda /global/scratch/users/user_name/</span>
 <span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a></span>
@@ -387,7 +390,7 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb23-1"><a href=
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="ex">jupyter</span> kernelspec list</span></code></pre></div>
 <p>And to remove one:</p>
 <div class="sourceCode" id="cb25"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="ex">jupyter</span> kernelspec remove <span class="op">&lt;</span>kernel-name<span class="op">&gt;</span></span></code></pre></div>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="ex">jupyter</span> kernelspec remove test_env</span></code></pre></div>
 </div>
 <div id="condarc-for-configuration" class="slide section level1">
 <h1>.condarc For Configuration</h1>
