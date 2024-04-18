@@ -7,6 +7,7 @@
 
 - Conda is an open source package and environment management system.
 - If you are installing Conda on your local machine you can pick between Miniconda and Anaconda.
+  - pre-installed on Savio
 - Conda can manage packages for a wide variety of programming languages but is most often used with Python.
 - works well across multiple platforms (macOS, Windows, Linux)
 
@@ -163,7 +164,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - numpy
+  - black
   - python=3.10
   - pip:
     - flake8
@@ -205,9 +206,9 @@ conda create --prefix /global/scratch/users/jejacob/conda/scratch_myenv python=3
 ```
 This environment can be activated from anywhere on Savio like such:
 ```bash
-source activate /global/scratch/users/jejacob/envs/scratch_myenv 
+source activate /global/scratch/users/jejacob/conda/scratch_myenv 
 ```
-Lastly to expedite the proccess you can move your `.conda` directory itself to scratch and using a Symbolic Link to preserve the file paths
+Lastly to expedite the proccess you can move your `.conda` directory itself to scratch and use a Symbolic Link to preserve the file paths
 ```bash
 mv /global/home/users/user_name/.conda /global/scratch/users/user_name/
 
@@ -232,7 +233,7 @@ jupyter kernelspec list
 ```
 And to remove one:
 ```bash
-jupyter kernelspec remove <kernel-name>
+jupyter kernelspec remove test_env
 ```
 
 # .condarc For Configuration
