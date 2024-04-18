@@ -13,14 +13,19 @@
     div.columns{display: flex; gap: min(4vw, 1.5em);}
     div.column{flex: auto; overflow-x: auto;}
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
     ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
       width: 0.8em;
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
     pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span { line-height: 1.25; }
     pre > code.sourceCode > span:empty { height: 1.2em; }
     .sourceCode { overflow: visible; }
     code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -31,7 +36,7 @@
     }
     @media print {
     pre > code.sourceCode { white-space: pre-wrap; }
-    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
     }
     pre.numberSource code
       { counter-reset: source-line 0; }
@@ -82,7 +87,6 @@
     code span.va { color: #19177c; } /* Variable */
     code span.vs { color: #4070a0; } /* VerbatimString */
     code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
   <link rel="stylesheet" type="text/css" media="screen, projection, print"
     href="https://www.w3.org/Talks/Tools/Slidy2/styles/slidy.css" />
@@ -135,13 +139,13 @@ conda to mamba for each command</li>
 again inside your conda environment as conda environments are blank
 slates</p>
 <div class="sourceCode" id="cb1"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install mamba <span class="at">-c</span> conda-forge</span></code></pre></div>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="ex">conda</span> install mamba <span class="at">-c</span> conda-forge</span></code></pre></div>
 <p>Note: as Savio upgrades to the Rocky8 operating system(in the coming
 months) mamba can be set as the default solver in conda by doing the
 following in your base environment:</p>
 <div class="sourceCode" id="cb2"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> conda install <span class="at">-n</span> base conda-libmamba-solver</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> conda config <span class="at">--set</span> solver libmamba</span></code></pre></div>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="ex">$</span> conda install <span class="at">-n</span> base conda-libmamba-solver</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="ex">$</span> conda config <span class="at">--set</span> solver libmamba</span></code></pre></div>
 </div>
 <div id="why-should-we-use-them" class="slide section level1">
 <h1>Why Should We Use Them?</h1>
@@ -180,31 +184,30 @@ installation</li>
 </ul></li>
 </ul>
 <div class="sourceCode" id="cb3"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">module</span> load python</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> create <span class="at">--name</span><span class="op">=</span>test_env python=3.10 numpy</span></code></pre></div>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="ex">module</span> load python</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="ex">conda</span> create <span class="at">--name</span><span class="op">=</span>test_env python=3.10 numpy</span></code></pre></div>
 <p>We can do the same thing using mamba</p>
 <div class="sourceCode" id="cb4"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-c</span> conda-forge <span class="at">--name</span> test_env2 python=3.10</span></code></pre></div>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-c</span> conda-forge <span class="at">--name</span> test_env2 python=3.10</span></code></pre></div>
 <p>Afterwards we can view all of our environments and where they are
 located with the following command:</p>
 <div class="sourceCode" id="cb5"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> env list</span></code></pre></div>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="ex">conda</span> env list</span></code></pre></div>
 <p>the output may look something like this, the environment we are in
 currently will be marked by a *</p>
-<pre><code># conda environments:
-#
-base                  *  /Users/yourusername/anaconda3
-myenv                    /Users/yourusername/anaconda3/envs/myenv
-another-env              /Users/yourusername/anaconda3/envs/another-env</code></pre>
+<pre><code>pyspark               *  /global/home/users/jejacob/.conda/envs/pyspark
+pytorch                  /global/home/users/jejacob/.conda/envs/pytorch
+                         /global/scratch/users/jejacob/envs/ani
+base                     /global/software/sl-7.x86_64/modules/langs/python/3.10</code></pre>
 </div>
 <div id="conda-channels" class="slide section level1">
 <h1>Conda Channels</h1>
 <p>Why did we include <code>-c conda-forge</code> in our command?</p>
 <ul>
 <li>Conda Channels are the locations where the actual packages are
-stored common channels include
+stored common channels include:
 <ul>
-<li>Anaconda: the deafult channel, it hosts a large number of packages
+<li>Anaconda: The default channel, it hosts a large number of packages
 and is considered stable</li>
 <li>conda-forge: A Community driven channel that has a larger number of
 packages than anaconda and often has newer versions</li>
@@ -216,8 +219,8 @@ more up to date packages and a broader selection</li>
 </ul>
 <p>conda-forge can be set as the priority channel like such:</p>
 <div class="sourceCode" id="cb7"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> config <span class="at">--add</span> channels conda-forge</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> config <span class="at">--set</span> channel_priority strict</span></code></pre></div>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="ex">conda</span> config <span class="at">--add</span> channels conda-forge</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="ex">conda</span> config <span class="at">--set</span> channel_priority strict</span></code></pre></div>
 </div>
 <div id="activating-adding-to-and-deleting-environments"
 class="slide section level1">
@@ -235,31 +238,49 @@ logging into the shell causing slowdowns.</p></li>
 the following:</p></li>
 </ul>
 <div class="sourceCode" id="cb8"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>  <span class="ex">conda</span> config <span class="at">--set</span> auto_activate_base False</span></code></pre></div>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>  <span class="ex">conda</span> config <span class="at">--set</span> auto_activate_base False</span></code></pre></div>
 <p>Let’s activate our environemnt</p>
 <div class="sourceCode" id="cb9"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> activate test_env</span></code></pre></div>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="bu">source</span> activate test_env</span></code></pre></div>
 <p>To add to an environment we use the install command while in a
 environment, we can also set the verion of our package</p>
 <div class="sourceCode" id="cb10"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> install <span class="at">-c</span> conda-forge scipy=1.4.1</span></code></pre></div>
-<p>We can also install packages in conda environments through pip, this
-is generally not recomended if there is a corresponding conda
-installation availible as pip and conda may resolve dependancies
-differently. If we do install via pip in a environment the installation
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="ex">mamba</span> install <span class="at">-c</span> conda-forge scipy=1.4.1</span></code></pre></div>
+<p>To exit the environment:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="bu">source</span> deactivate</span></code></pre></div>
+<p>Finally we can delete our environment if we no longer need it</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="ex">mamba</span> remove <span class="at">--name</span> test_env <span class="at">--all</span></span></code></pre></div>
+</div>
+<div id="installing-packages-via-pip-and-isolating-environments"
+class="slide section level1">
+<h1>Installing Packages via Pip and Isolating Environments</h1>
+<ul>
+<li>We can also install packages in conda environments through pip
+<ul>
+<li>This is generally not recomended if there is a Conda version of the
+package, as pip and conda may resolve dependancies differently.</li>
+</ul></li>
+</ul>
+<p>If we do install via pip in a environment ensure the installation
 will be confined to the environment, avoiding impacts on the global
 <code>~/.local directory</code>.</p>
-<div class="sourceCode" id="cb11"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install pandas</span></code></pre></div>
-<p>To exit the environment:</p>
-<div class="sourceCode" id="cb12"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> deactivate</span></code></pre></div>
-<p>Finally we can delete our environment if we no longer need it</p>
 <div class="sourceCode" id="cb13"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> remove <span class="at">--name</span> test_env <span class="at">--all</span></span></code></pre></div>
-</div>
-<div id="creating-and-using-export-files" class="slide section level1">
-<h1>Creating and Using Export Files</h1>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="ex">pip</span> install pandas</span></code></pre></div>
+<p>It is important to note a Conda environment may not be completely
+isolated if it uses packages installed in the user’s home directory
+<code>~/.local</code>, this can happen when packages were installed
+using <code>pip install --user</code> outside of the Conda
+environment.</p>
+<p>You can check all of the packages installed in your environment and
+if any are from your local directory with the following:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="ex">conda</span> list</span></code></pre></div>
+<p>If you find that you are using packages from <code>~local</code> you
+can reinstall them in your environment to ensure your environment uses
+its own isolated versions of those packages # Creating and Using Export
+Files</p>
 <ul>
 <li>Part of the reason Conda is so popular is the ability to share
 environments with anyone, streamlining the development process</li>
@@ -267,29 +288,31 @@ environments with anyone, streamlining the development process</li>
 how the environment should be set up, here is an example of what one may
 look like:</li>
 </ul>
-<div class="sourceCode" id="cb14"><pre
-class="sourceCode yml"><code class="sourceCode yaml"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> myenv</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">channels</span><span class="kw">:</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> conda-forge</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> defaults</span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">dependencies</span><span class="kw">:</span></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> numpy=1.18.1</span></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> pandas=1.0.3</span></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> python=3.8</span></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">pip</span><span class="kw">:</span></span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> pandas</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode yml"><code class="sourceCode yaml"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> myenv-exp</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">channels</span><span class="kw">:</span></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> conda-forge</span></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> defaults</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="fu">dependencies</span><span class="kw">:</span></span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> numpy=1.18.1</span></span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> pandas=1.0.3</span></span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> python=3.8</span></span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">pip</span><span class="kw">:</span></span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> ray</span></span></code></pre></div>
 <p>You can generate one of these based on your current environment
 configuration as follows, make sure you are in a env:</p>
-<div class="sourceCode" id="cb15"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> env export <span class="op">&gt;</span> environment.yml</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="ex">mamba</span> env export <span class="op">&gt;</span> environment.yml</span></code></pre></div>
 <p>You can create a conda env based on a configuration file like
 such:</p>
-<div class="sourceCode" id="cb16"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> env create <span class="at">-f</span> environment.yml</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="ex">mamba</span> env create <span class="at">-f</span> environment.yml</span></code></pre></div>
 </div>
-<div id="deleting-unused-packages-and-saving-environments-to-scratch"
+<div
+id="deleting-unused-packages-and-creating-conda-environments-in-scratch"
 class="slide section level1">
-<h1>Deleting Unused Packages and Saving Environments to Scratch</h1>
+<h1>Deleting Unused Packages and Creating Conda Environments in
+Scratch</h1>
 <ul>
 <li>Up to now all of our environments have been saved to our local
 directory in the <code>.conda</code> folder. On Savio we are granted 10
@@ -307,14 +330,14 @@ packages, it is best practice to occasionally clean
 performance.</li>
 </ul>
 <p>To view all cached packages:</p>
-<div class="sourceCode" id="cb17"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> list <span class="at">--cache</span></span></code></pre></div>
-<p>To delete unused packages:</p>
 <div class="sourceCode" id="cb18"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> clean <span class="at">--packages</span></span></code></pre></div>
-<p>to delete all cached packages:</p>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="ex">conda</span> list <span class="at">--cache</span></span></code></pre></div>
+<p>To delete unused packages:</p>
 <div class="sourceCode" id="cb19"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> clean <span class="at">--all</span></span></code></pre></div>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="ex">conda</span> clean <span class="at">--packages</span></span></code></pre></div>
+<p>to delete all cached packages:</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="ex">conda</span> clean <span class="at">--all</span></span></code></pre></div>
 <ul>
 <li>Of course this is oftetimes not feasible as there are no unused
 packages and you do not want to delete anything. Saving conda
@@ -322,12 +345,19 @@ environments to the scratch directory is a great way to circumvent the
 10gb storage limit on local.</li>
 </ul>
 <p>This can be done as such</p>
-<div class="sourceCode" id="cb20"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> create <span class="at">--prefix</span> /global/scratch/users/jejacob/conda/scratch_myenv python=3.8 numpy pandas</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="ex">conda</span> create <span class="at">--prefix</span> /global/scratch/users/jejacob/conda/scratch_myenv python=3.8 numpy pandas</span></code></pre></div>
 <p>This environment can be activated from anywhere on Savio like
 such:</p>
-<div class="sourceCode" id="cb21"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> activate /global/scratch/users/jejacob/conda/scratch_myenv </span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="bu">source</span> activate /global/scratch/users/jejacob/conda/scratch_myenv </span></code></pre></div>
+<p>Lastly to expedite the proccess you can move your <code>.conda</code>
+directory itself to scratch and using a Symbolic Link to preserve the
+file paths</p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="fu">mv</span> /global/home/users/user_name/.conda /global/scratch/users/user_name/</span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a><span class="fu">ln</span> <span class="at">-s</span> /global/scratch/users/user_name/.conda /global/home/users/user_name/.conda</span></code></pre></div>
 </div>
 <div id="using-our-environment-as-a-jupyter-kernel"
 class="slide section level1">
@@ -343,16 +373,36 @@ on Demand</a></li>
 <p>To add a conda env as a Jupyter Kernel you can do the following, make
 sure <code>Jupyter</code> and <code>Ipykernel</code> are installed on
 the environment</p>
-<div class="sourceCode" id="cb22"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> activate myenv</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> install jupyter ipykernel</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-m</span> ipykernel install <span class="at">--user</span> <span class="at">--name</span><span class="op">=</span>myenv <span class="at">--display-name</span><span class="op">=</span><span class="st">&quot;Python (myenv)&quot;</span></span></code></pre></div>
-<p>To view all your kernels:</p>
-<div class="sourceCode" id="cb23"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="ex">jupyter</span> kernelspec list</span></code></pre></div>
-<p>And to remove one:</p>
 <div class="sourceCode" id="cb24"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="ex">jupyter</span> kernelspec remove <span class="op">&lt;</span>kernel-name<span class="op">&gt;</span></span></code></pre></div>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="ex">mamba</span> activate myenv</span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a><span class="ex">mamba</span> install jupyter ipykernel</span>
+<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a><span class="ex">python</span> <span class="at">-m</span> ipykernel install <span class="at">--user</span> <span class="at">--name</span><span class="op">=</span>myenv <span class="at">--display-name</span><span class="op">=</span><span class="st">&quot;Python (myenv)&quot;</span></span></code></pre></div>
+<p>To view all your kernels:</p>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="ex">jupyter</span> kernelspec list</span></code></pre></div>
+<p>And to remove one:</p>
+<div class="sourceCode" id="cb26"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a><span class="ex">jupyter</span> kernelspec remove <span class="op">&lt;</span>kernel-name<span class="op">&gt;</span></span></code></pre></div>
+</div>
+<div id="condarc-for-configuration" class="slide section level1">
+<h1>.condarc For Configuration</h1>
+<ul>
+<li>The .condarc file is a configuration file for Conda that lets you
+customize how Conda behaves.
+<ul>
+<li>usually located in the home dir</li>
+</ul></li>
+</ul>
+<p>Many of the commands we’ve used throughout this demo have modified
+<code>.condarc</code> with our channel config being one</p>
+<div class="sourceCode" id="cb27"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a><span class="ex">conda</span> config <span class="at">--add</span> channels conda-forge</span>
+<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a><span class="ex">conda</span> config <span class="at">--set</span> channel_priority strict</span></code></pre></div>
+<p>Let’s modify our <code>.condarc</code> so that every new Conda
+environment we create includes Numpy by default</p>
+<div class="sourceCode" id="cb28"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="ex">create_default_packages:</span></span>
+<span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a>  <span class="ex">-</span> numpy</span></code></pre></div>
 </div>
 <div id="using-condamamba-for-non-python-related-software"
 class="slide section level1">
@@ -370,15 +420,15 @@ community-driven collection of repositories that significantly expand
 the number and types of packages available.</li>
 </ul>
 <p>An R example:</p>
-<div class="sourceCode" id="cb25"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">--name</span> my-r-env r-essentials r-base</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> activate my-r-env</span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">--name</span> my-r-env r-essentials r-base</span>
+<span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a><span class="ex">mamba</span> activate my-r-env</span></code></pre></div>
 <p>C++ example:</p>
-<div class="sourceCode" id="cb26"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">--name</span> cpp-env</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> activate cpp-env</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> install <span class="at">-c</span> conda-forge boost</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> install <span class="at">-c</span> conda-forge cmake</span></code></pre></div>
+<div class="sourceCode" id="cb30"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">--name</span> cpp-env</span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a><span class="ex">mamba</span> activate cpp-env</span>
+<span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a><span class="ex">mamba</span> install <span class="at">-c</span> conda-forge boost</span>
+<span id="cb30-4"><a href="#cb30-4" tabindex="-1"></a><span class="ex">mamba</span> install <span class="at">-c</span> conda-forge cmake</span></code></pre></div>
 </div>
 </body>
 </html>
