@@ -70,18 +70,17 @@ conda env list
 the output may look something like this, the environment we are in currently will be marked by a *
 
 ```
-# conda environments:
-#
-base                  *  /Users/yourusername/anaconda3
-myenv                    /Users/yourusername/anaconda3/envs/myenv
-another-env              /Users/yourusername/anaconda3/envs/another-env
+pyspark               *  /global/home/users/jejacob/.conda/envs/pyspark
+pytorch                  /global/home/users/jejacob/.conda/envs/pytorch
+                         /global/scratch/users/jejacob/envs/ani
+base                     /global/software/sl-7.x86_64/modules/langs/python/3.10
 ```
 
 # Conda Channels
 Why did we include `-c conda-forge` in our command?
 
-- Conda Channels are the locations where the actual packages are stored common channels include 
-  - Anaconda: the deafult channel, it hosts a large number of packages and is considered stable
+- Conda Channels are the locations where the actual packages are stored common channels include: 
+  - Anaconda: The default channel, it hosts a large number of packages and is considered stable
   - conda-forge: A Community driven channel that has a larger number of packages than anaconda and often has newer versions
   - nvidia: This channel is specifically for packages optimized for NVIDIA hardware, like GPU-accelerated libraries.
   
@@ -122,13 +121,6 @@ mamba install -c conda-forge scipy=1.4.1
 ```
 
 
-
-We can also install packages in conda environments through pip, this is generally not recomended if there is a corresponding conda installation availible as pip and conda may resolve dependancies differently.
-If we do install via pip in a environment the installation will be confined to the environment, avoiding impacts on the global `~/.local directory`.
-```bash
-pip install pandas
-```
-
 To exit the environment:
 ```bash
 source deactivate
@@ -136,16 +128,31 @@ source deactivate
 
 Finally we can delete our environment if we no longer need it
 ```bash
-conda remove --name test_env --all
+mamba remove --name test_env --all
 ```
+# Installing Packages via Pip and Isolating Environments
+- We can also install packages in conda environments through pip
+  - This is generally not recomended if there is a Conda version of the package, as pip and conda may resolve dependancies differently.
+  
+If we do install via pip in a environment ensure the installation will be confined to the environment, avoiding impacts on the global `~/.local directory`.
+```bash
+pip install pandas
+```
+ It is important to note  a Conda environment may not be completely isolated if it uses packages installed in the user's home directory `~/.local`, this can happen when packages were installed using `pip install --user` outside of the Conda environment.
 
+You can check all of the packages installed in your environment and if any are from your local directory with the following:
+
+```bash
+conda list
+```
+If you find that you are using packages from `~local` you can reinstall them in your environment to ensure your environment uses its own isolated versions of those packages
 # Creating and Using Export Files
 
 - Part of the reason Conda is so popular is the ability to share environments with anyone, streamlining the development process
 - the actual export file is written in `yaml` and dictates how the environment should be set up, here is an example of what one may look like:
 
 ```yml
-name: myenv
+name: myenv-exp
 channels:
   - conda-forge
   - defaults
@@ -154,12 +161,13 @@ dependencies:
   - pandas=1.0.3
   - python=3.8
   - pip:
-    - pandas
+    - ray
+
 ```
 You can generate one of these based on your current environment configuration as follows, make sure you are in a env:
 
 ```bash
-conda env export > environment.yml
+mamba env export > environment.yml
 ```
 
 You can create a conda env based on a configuration file like such:
@@ -168,7 +176,7 @@ You can create a conda env based on a configuration file like such:
 mamba env create -f environment.yml
 ```
 
-# Deleting Unused Packages and Saving Environments to Scratch 
+# Deleting Unused Packages and Creating Conda Environments in Scratch
 
 - Up to now all of our environments have been saved to our local directory in the `.conda` folder. On Savio we are granted 10 gb of storage space on local, this can quickly fill up esspecially when working with larger packages.
 - `~/.conda/pkgs` Directory: This subdirectory within ~/.conda stores package caches. Whenever you install a package using Conda, it downloads these packages as compressed files and stores them here before extracting them into the specified environment. Keeping these files allows Conda to avoid downloading them again if you need to reinstall a package.
@@ -197,6 +205,13 @@ This environment can be activated from anywhere on Savio like such:
 ```bash
 source activate /global/scratch/users/jejacob/conda/scratch_myenv 
 ```
+Lastly to expedite the proccess you can move your `.conda` directory itself to scratch and using a Symbolic Link to preserve the file paths
+```bash
+mv /global/home/users/user_name/.conda /global/scratch/users/user_name/
+
+ln -s /global/scratch/users/user_name/.conda /global/home/users/user_name/.conda
+```
+
 # Using our environment as a Jupyter Kernel
 - Another popular reason to use conda is its great integration with Jupyter Notebooks
 - Jupyter notebooks are very popular on Savio and can be accsessed through [Open on Demand](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/ood/jupyter/)
@@ -216,6 +231,21 @@ jupyter kernelspec list
 And to remove one:
 ```bash
 jupyter kernelspec remove <kernel-name>
+```
+
+# .condarc For Configuration
+- The .condarc file is a configuration file for Conda that lets you customize how Conda behaves. 
+  - usually located in the home dir
+
+Many of the commands we've used throughout this demo have modified `.condarc` with our channel config being one
+```bash
+conda config --add channels conda-forge
+conda config --set channel_priority strict
+```
+Let's modify our `.condarc` so that every new Conda environment we create includes Numpy by default
+```bash
+create_default_packages:
+  - numpy
 ```
 
 # Using Conda/Mamba for non-Python related software
