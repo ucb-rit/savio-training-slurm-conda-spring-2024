@@ -1,4 +1,7 @@
-% Conda/Mamba
+% Savio intermediate training: Conda/Mamba
+% April 18, 2024
+% Chris Paciorek and Jeffrey Jacob
+
 
 # What is Conda?
 
@@ -18,8 +21,8 @@
 
 # Conda Vs Mamba
 - Conda may be slow at times
-- Mamba is a faster drop in replacement for conda which is implemented in c++ and takes advantage of parallel loading
-- Mamba and Conda can be used interchangably just change the prefix conda to mamba for each command
+- Mamba is a faster drop in replacement for conda which is implemented in c++ and takes advantage of parallel loading.
+- Mamba and Conda can be used interchangably just change the prefix conda to mamba for each command.
 
 Mamba can be installed like such, remember you may need to install it again inside your conda environment as conda environments are blank slates
 
@@ -27,7 +30,7 @@ Mamba can be installed like such, remember you may need to install it again insi
 conda install mamba -c conda-forge
 ```
 
-Note: as Savio upgrades to the Rocky8 operating system(in the coming months) mamba can be set as the default solver in conda by doing the following in your base environment:
+Note: As Savio upgrades to the Rocky8 operating system (in the coming months) mamba can be set as the default solver in conda by doing the following in your base environment:
 ```bash
 $ conda install -n base conda-libmamba-solver
 $ conda config --set solver libmamba
@@ -51,9 +54,10 @@ $ conda config --set solver libmamba
   - we can specify packages to add at time of creation by including them to the right of our command ie. `numpy`
   - we can set our version of python ie. `python=3.10` doing so isolates the environment's python from your system's base python installation
 
+note:  We can set the version of our packages
 ```bash
 module load python
-conda create --name=test_env python=3.10 numpy
+conda create --name=test_env python=3.10 numpy=1.26.4
 ```
 
 We can do the same thing using mamba
@@ -80,8 +84,8 @@ base                     /global/software/sl-7.x86_64/modules/langs/python/3.10
 Why did we include `-c conda-forge` in our command?
 
 - Conda Channels are the locations where the actual packages are stored common channels include: 
-  - Anaconda: The default channel, it hosts a large number of packages and is considered stable
-  - conda-forge: A Community driven channel that has a larger number of packages than anaconda and often has newer versions
+  - Anaconda: The default channel, it hosts a large number of packages and is considered stable.
+  - conda-forge: A Community driven channel that has a larger number of packages than anaconda and often has newer versions.
   - nvidia: This channel is specifically for packages optimized for NVIDIA hardware, like GPU-accelerated libraries.
   
 - It is generally a good idea to opt for the conda-forge channel for more up to date packages and a broader selection
@@ -99,7 +103,7 @@ conda config --set channel_priority strict
 # Activating, Adding to, and Deleting Environments
 
 - Environments can be activated using `source activate` or `conda/mamba activate`
-- `source` is [recomended on Savio](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/software/using-software/using-python-savio/) as using conda activate might require the use of `conda init` which can alter ther shell behavior due to odifiying .bashrc conda may now attempt to start a base environment when 
+- `source` is [recomended on Savio](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/software/using-software/using-python-savio/) as using conda activate might require the use of `conda init` which can alter ther shell behavior due to modifiying `.bashrc` conda may now attempt to start a base environment when 
 logging into the shell causing slowdowns.
 
 - If you do use conda init you can stop base environment setup with the following:
@@ -111,13 +115,13 @@ logging into the shell causing slowdowns.
 Let's activate our environemnt
 
 ```bash
-source activate test_env
+source activate test_env2
 ```
 
-To add to an environment we use the install command while in a environment, we can also set the verion of our package
+To add to an environment we use the install command while in a environment
 
 ```bash
-mamba install -c conda-forge scipy=1.4.1
+mamba install -c conda-forge flake8
 ```
 
 
@@ -128,15 +132,16 @@ source deactivate
 
 Finally we can delete our environment if we no longer need it
 ```bash
-mamba remove --name test_env --all
+mamba remove --name test_env2 --all
 ```
 # Installing Packages via Pip and Isolating Environments
 - We can also install packages in conda environments through pip
-  - This is generally not recomended if there is a Conda version of the package, as pip and conda may resolve dependancies differently.
+  - This is generally not recomended if there is a Conda version of the package as pip and conda may resolve dependancies differently.
   
 If we do install via pip in a environment ensure the installation will be confined to the environment, avoiding impacts on the global `~/.local directory`.
 ```bash
-pip install pandas
+source activate test_env
+pip install black
 ```
  It is important to note  a Conda environment may not be completely isolated if it uses packages installed in the user's home directory `~/.local`, this can happen when packages were installed using `pip install --user` outside of the Conda environment.
 
@@ -146,6 +151,7 @@ You can check all of the packages installed in your environment and if any are f
 conda list
 ```
 If you find that you are using packages from `~local` you can reinstall them in your environment to ensure your environment uses its own isolated versions of those packages
+
 # Creating and Using Export Files
 
 - Part of the reason Conda is so popular is the ability to share environments with anyone, streamlining the development process
@@ -157,11 +163,10 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - numpy=1.18.1
-  - pandas=1.0.3
-  - python=3.8
+  - numpy
+  - python=3.10
   - pip:
-    - ray
+    - flake8
 
 ```
 You can generate one of these based on your current environment configuration as follows, make sure you are in a env:
@@ -173,7 +178,7 @@ mamba env export > environment.yml
 You can create a conda env based on a configuration file like such:
 
 ```bash
-mamba env create -f environment.yml
+mamba env create -f env.yml
 ```
 
 # Deleting Unused Packages and Creating Conda Environments in Scratch
@@ -182,10 +187,7 @@ mamba env create -f environment.yml
 - `~/.conda/pkgs` Directory: This subdirectory within ~/.conda stores package caches. Whenever you install a package using Conda, it downloads these packages as compressed files and stores them here before extracting them into the specified environment. Keeping these files allows Conda to avoid downloading them again if you need to reinstall a package.
 - Deleting a conda env thus does not actually delete the associated packages, it is best practice to occasionally clean `.conda/pkgs` for this reason to save disk spack and maximize performance.
 
-To view all cached packages:
-```bash
-conda list --cache
-```
+
 To delete unused packages:
 ```bash
 conda clean --packages
@@ -199,11 +201,11 @@ conda clean --all
 
 This can be done as such
 ```bash
-conda create --prefix /global/scratch/users/jejacob/conda/scratch_myenv python=3.8 numpy pandas
+conda create --prefix /global/scratch/users/jejacob/conda/scratch_myenv python=3.8 
 ```
 This environment can be activated from anywhere on Savio like such:
 ```bash
-source activate /global/scratch/users/jejacob/conda/scratch_myenv 
+source activate /global/scratch/users/jejacob/envs/scratch_myenv 
 ```
 Lastly to expedite the proccess you can move your `.conda` directory itself to scratch and using a Symbolic Link to preserve the file paths
 ```bash
@@ -219,9 +221,9 @@ ln -s /global/scratch/users/user_name/.conda /global/home/users/user_name/.conda
 To add a conda env as a Jupyter Kernel you can do the following, make sure `Jupyter` and `Ipykernel` are installed on the environment
 
 ```bash
-mamba activate myenv
+source activate test_env
 mamba install jupyter ipykernel
-python -m ipykernel install --user --name=myenv --display-name="Python (myenv)"
+python -m ipykernel install --user --name=test_env --display-name="Python (test)"
 ```
 
 To view all your kernels:
@@ -237,7 +239,7 @@ jupyter kernelspec remove <kernel-name>
 - The .condarc file is a configuration file for Conda that lets you customize how Conda behaves. 
   - usually located in the home dir
 
-Many of the commands we've used throughout this demo have modified `.condarc` with our channel config being one
+Many of the commands we've used throughout this demo have modified `.condarc` ie. our channel config
 ```bash
 conda config --add channels conda-forge
 conda config --set channel_priority strict
@@ -267,3 +269,15 @@ mamba install -c conda-forge boost
 mamba install -c conda-forge cmake
 ```
 
+# How to get additional help
+
+ - For technical issues and questions about using Savio:
+    - brc-hpc-help@berkeley.edu
+ - For questions about computing resources in general, including cloud computing:
+    - brc@berkeley.edu or research-it-consulting@berkeley.edu
+    - office hours: Wed. 1:30-3:00 and Thur. 9:30-11:00 [on Zoom](https://research-it.berkeley.edu/programs/berkeley-research-computing/research-computing-consulting)
+ - For questions about data management (including HIPAA-protected data):
+    - researchdata@berkeley.edu
+    - office hours: Wed. 1:30-3:00 and Thur. 9:30-11:00 [on Zoom](https://research-it.berkeley.edu/programs/berkeley-research-computing/research-computing-consulting)
+ - Status & Service Updates
+    - The best way to stay updated on the latest status and updates for the Research IT services is on the front page of the Research IT website. If you are having issues or unsure if one of our services is down, check there first before sending us a ticket. 
